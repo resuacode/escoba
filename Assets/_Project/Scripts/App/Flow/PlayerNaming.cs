@@ -1,17 +1,25 @@
 using System.Collections.Generic;
+using Escoba.Core;
 using Escoba.Presentation;
 
 namespace Escoba.App
 {
     /// <summary>
-    /// Nombres visibles de asientos y bandos:
-    /// con un solo humano, "Tú" y "Rival" (1 contra 1) o "IA n"; con varios humanos,
-    /// "Jugador n" / "IA n" (n = asiento + 1). Con parejas, los bandos son "Pareja 1" y "Pareja 2".
+    /// Nombres visibles de asientos y bandos. Un humano con nombre elegido usa ese nombre; si no,
+    /// con un solo humano es "Tú", y con varios, "Jugador n". La IA es "Rival" (1 contra 1) o
+    /// "IA n" (n = asiento + 1). Si dos nombres coinciden, se añade el número de asiento.
+    /// Con parejas, los bandos son "Pareja 1" y "Pareja 2".
     /// </summary>
     public static class PlayerNaming
     {
+        /// <summary>Nombre por defecto de un asiento humano (también es el texto de ayuda del campo de nombre).</summary>
+        public static string DefaultHumanName(int seat, int humanCount)
+        {
+            return humanCount == 1 ? Localization.Get("game.you") : Localization.Get("player.human", seat + 1);
+        }
+
         /// <summary>Nombre de cada asiento.</summary>
-        public static string[] SeatNames(IReadOnlyList<SeatType> seats)
+        public static string[] SeatNames(IReadOnlyList<SeatType> seats, IReadOnlyList<string> customNames = null)
         {
             int humans = 0;
             foreach (SeatType seat in seats)
@@ -27,11 +35,24 @@ namespace Escoba.App
             {
                 if (seats[i] == SeatType.Human)
                 {
-                    names[i] = humans == 1 ? Localization.Get("game.you") : Localization.Get("player.human", i + 1);
+                    string custom = customNames != null && i < customNames.Count ? PlayerNameRules.Sanitize(customNames[i]) : null;
+                    names[i] = custom ?? DefaultHumanName(i, humans);
                 }
                 else
                 {
                     names[i] = humans == 1 && seats.Count == 2 ? Localization.Get("game.opponent") : Localization.Get("player.bot", i + 1);
+                }
+            }
+
+            // Nombres repetidos (p. ej. dos "Ana" o alguien que se llama "IA 2"): se distinguen por asiento.
+            for (int i = 0; i < names.Length; i++)
+            {
+                for (int j = i + 1; j < names.Length; j++)
+                {
+                    if (string.Equals(names[i], names[j], System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        names[j] = $"{names[j]} ({j + 1})";
+                    }
                 }
             }
 
@@ -55,7 +76,7 @@ namespace Escoba.App
             return new[] { Localization.Get("team.name", 1), Localization.Get("team.name", 2) };
         }
 
-        /// <summary>Miembros de una pareja ("Jugador 1 y Jugador 3").</summary>
+        /// <summary>Miembros de una pareja ("Laura y Pablo").</summary>
         public static string TeamMembers(IReadOnlyList<string> seatNames, int side)
         {
             return Localization.Get("team.members", seatNames[side], seatNames[side + 2]);

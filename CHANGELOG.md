@@ -11,6 +11,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); v
 - Nombres: "Tú"/"Rival" (1 contra 1), "IA n", "Jugador n", "Pareja n" en es/gl/en.
 - `SeatLayout`, `SeatPanelView`, `PassScreenPanel`, `PlayerNaming`, `SeatType`; `MatchConfig` con asientos y parejas.
 - Tests: `SeatLayoutTests`, `MatchSetupTests` (EditMode); partidas completas 2/3/4/parejas y `HotSeat_PassScreenHidesHandsAndSwitchesViewer` (PlayMode).
+- Nombres de jugador: campo de texto por asiento humano en "Nueva partida" (texto de ayuda = nombre por defecto, máx. 12 caracteres). Se usan en la ficha, el marcador, la pantalla de pase, el resumen y el final; nombres repetidos se distinguen con el número de asiento.
+- `PlayerNameRules` (Core, reutilizable en online): recorta espacios, limita a 12 caracteres y elimina `< > { } |` y caracteres de control.
+- "Nueva partida" recuerda la última configuración (jugadores, parejas, asientos) por separado para "contra la IA" y "en este dispositivo"; los nombres se comparten (`SetupPreferences`).
+- Tests: `PlayerNamesTests` (EditMode) y `Menu_PlayerNames_AreUsedInGameAndRemembered` (PlayMode, restaura las preferencias al terminar).
 
 ### Changed
 - `HudView` pasa a mostrar un marcador de hasta 4 bandos; la información de cada jugador vive en `SeatPanelView`.

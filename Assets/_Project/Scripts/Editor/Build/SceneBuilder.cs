@@ -145,18 +145,26 @@ namespace Escoba.Editor.Build
             Button[] modes = ButtonRow(setup, "Mode", new[] { "setup.mode.individual", "setup.mode.teams" }, new Vector2(leftX, -330f), new Vector2(300f, 80f), 30f);
 
             var seatRows = new Object[4];
-            var seatLabels = new Object[4];
+            var nameInputs = new Object[4];
+            var namePlaceholders = new Object[4];
+            var botLabels = new Object[4];
             var seatButtons = new Object[4];
             for (int i = 0; i < 4; i++)
             {
                 RectTransform row = CreateRect($"SeatRow{i}", setup);
                 Place(row, new Vector2(0.5f, 1f), new Vector2(leftX, -430f - (i * 82f)), new Vector2(640f, 72f));
-                TextMeshProUGUI label = CreateText(row, "Label", "player.human", 34f, TextAlignmentOptions.Left, TextLight);
-                Place(label.rectTransform, Center, new Vector2(-160f, 0f), new Vector2(300f, 64f));
-                Button seatButton = CreateButton(row, "SeatButton", "setup.seat.human", new Vector2(280f, 68f), 32f);
-                Place((RectTransform)seatButton.transform, Center, new Vector2(170f, 0f), new Vector2(280f, 68f));
+
+                TMP_InputField nameInput = CreateInputField(row, $"NameInput{i}", "player.human", new Vector2(320f, 64f), 32f);
+                Place((RectTransform)nameInput.transform, Center, new Vector2(-150f, 0f), new Vector2(320f, 64f));
+                TextMeshProUGUI botLabel = CreateText(row, "BotLabel", "player.bot", 34f, TextAlignmentOptions.Left, TextLight);
+                Place(botLabel.rectTransform, Center, new Vector2(-150f, 0f), new Vector2(320f, 64f));
+
+                Button seatButton = CreateButton(row, "SeatButton", "setup.seat.human", new Vector2(260f, 68f), 32f);
+                Place((RectTransform)seatButton.transform, Center, new Vector2(180f, 0f), new Vector2(260f, 68f));
                 seatRows[i] = row.gameObject;
-                seatLabels[i] = label.GetComponent<LocalizedText>();
+                nameInputs[i] = nameInput;
+                namePlaceholders[i] = nameInput.placeholder.GetComponent<LocalizedText>();
+                botLabels[i] = botLabel.GetComponent<LocalizedText>();
                 seatButtons[i] = seatButton;
             }
 
@@ -198,7 +206,9 @@ namespace Escoba.Editor.Build
             SetField(controller, "_playerCountButtons", counts);
             SetField(controller, "_modeButtons", modes);
             SetField(controller, "_seatRows", seatRows);
-            SetField(controller, "_seatLabels", seatLabels);
+            SetField(controller, "_nameInputs", nameInputs);
+            SetField(controller, "_namePlaceholders", namePlaceholders);
+            SetField(controller, "_botLabels", botLabels);
             SetField(controller, "_seatButtons", seatButtons);
             SetField(controller, "_presetButtons", presets);
             SetField(controller, "_difficultyButtons", difficulties);

@@ -93,7 +93,7 @@ namespace Escoba.App
                     : (IPlayerController)new HumanLocalController(_table);
             }
 
-            _seatNames = PlayerNaming.SeatNames(_config.Seats);
+            _seatNames = PlayerNaming.SeatNames(_config.Seats, _config.PlayerNames);
             _sideNames = PlayerNaming.SideNames(_seatNames, _config.Teams);
             _scoreboardNames = _config.Teams
                 ? _sideNames.Select((name, side) => $"{name} <size=65%>({PlayerNaming.TeamMembers(_seatNames, side)})</size>").ToArray()

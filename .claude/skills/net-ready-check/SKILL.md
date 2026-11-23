@@ -31,4 +31,5 @@ Revisa el diff actual (`git diff` y ficheros nuevos) contra esta lista. Informa 
 ## Plan Photon (referencia para M6)
 - **Photon Fusion 2, Shared Mode** (decidido 2026-11-23). El Master Client de la sesión es la autoridad de la partida y ejecuta el motor; los clientes envían comandos por RPC; el Master Client envía a cada jugador su `PlayerView` con RPC dirigidos. Ver [docs/ARCHITECTURE.md](../../../docs/ARCHITECTURE.md) § Red.
 - No usar `[Networked]` para el estado de cartas (lo verían todos los clientes): solo RPC dirigidos e instantáneas filtradas.
+- Nombres de jugador recibidos por red: sanearlos siempre con `PlayerNameRules.Sanitize` en el Master Client (evita inyección de texto enriquecido TMP).
 - `Escoba.Net` define `INetworkTransport`; `LocalTransport` para hot‑seat/PvE; `PhotonTransport` en un ensamblado nuevo `Escoba.Net.Photon` (con referencias a Unity/Photon) para no contaminar Core.

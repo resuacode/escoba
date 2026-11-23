@@ -59,7 +59,7 @@ Pantalla "Nueva partida" (los valores se guardan como última configuración usa
 | Nº de jugadores | 2 / 3 / 4 | 2 |
 | Parejas | Sí / No (solo con 4) | Sí con 4 |
 | Asientos | Humano / Bot (Fácil, Medio, Difícil) por asiento | Humano + bots Medio |
-| Nombres | texto (máx. 12 caracteres) | "Jugador 1"… |
+| Nombres | texto (máx. 12 caracteres; se eliminan `< > { } \|`) para cada humano | Vacío → "Tú" (un humano) o "Jugador n" |
 | Objetivo | 15 / 21 / 31 / personalizado (5‑99) | 21 |
 | Empate en la setenta | Nadie puntúa / Ambos puntúan | Nadie puntúa |
 | Escoba en el reparto | Sí / No | Sí |

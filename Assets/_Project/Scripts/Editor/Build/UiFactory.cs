@@ -100,6 +100,44 @@ namespace Escoba.Editor.Build
             return button;
         }
 
+        /// <summary>
+        /// Campo de texto TMP de una línea. El texto de ayuda (placeholder) lleva
+        /// <see cref="LocalizedText"/> con <paramref name="placeholderKey"/>.
+        /// </summary>
+        public static TMP_InputField CreateInputField(Transform parent, string name, string placeholderKey, Vector2 size, float fontSize)
+        {
+            var resources = new TMP_DefaultControls.Resources { inputField = RoundedSprite };
+            GameObject go = TMP_DefaultControls.CreateInputField(resources);
+            go.name = name;
+            foreach (Transform child in go.GetComponentsInChildren<Transform>(true))
+            {
+                child.gameObject.layer = UiLayer;
+            }
+
+            go.transform.SetParent(parent, false);
+            ((RectTransform)go.transform).sizeDelta = size;
+
+            var input = go.GetComponent<TMP_InputField>();
+            input.lineType = TMP_InputField.LineType.SingleLine;
+            input.image.color = ButtonColor;
+
+            var text = (TextMeshProUGUI)input.textComponent;
+            text.fontSize = fontSize;
+            text.color = TextDark;
+            text.alignment = TextAlignmentOptions.MidlineLeft;
+            text.richText = false;
+
+            var placeholder = (TextMeshProUGUI)input.placeholder;
+            placeholder.fontSize = fontSize;
+            placeholder.fontStyle = FontStyles.Italic;
+            placeholder.color = new Color(0.35f, 0.33f, 0.3f, 0.8f);
+            placeholder.alignment = TextAlignmentOptions.MidlineLeft;
+            placeholder.text = $"[{placeholderKey}]";
+            var localized = placeholder.gameObject.AddComponent<LocalizedText>();
+            SetField(localized, "_key", placeholderKey);
+            return input;
+        }
+
         /// <summary>Asigna un campo serializado (referencia, cadena o array de referencias).</summary>
         public static void SetField(Object target, string field, object value)
         {

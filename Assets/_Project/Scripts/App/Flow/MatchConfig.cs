@@ -2,16 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Escoba.AI;
+using Escoba.Core;
 
 namespace Escoba.App
 {
     /// <summary>
-    /// Configuración de la partida elegida en el menú: reglas, asientos (humano o IA), parejas,
-    /// dificultad de la IA y semilla opcional.
+    /// Configuración de la partida elegida en el menú: reglas, asientos (humano o IA), nombres
+    /// de los humanos, parejas, dificultad de la IA y semilla opcional.
     /// </summary>
     public sealed class MatchConfig
     {
-        public MatchConfig(RulesPreset preset, BotDifficulty difficulty, IReadOnlyList<SeatType> seats, bool teams = false, ulong? seed = null)
+        public MatchConfig(RulesPreset preset, BotDifficulty difficulty, IReadOnlyList<SeatType> seats, bool teams = false,
+            ulong? seed = null, IReadOnlyList<string> playerNames = null)
         {
             if (seats == null || seats.Count < 2 || seats.Count > 4)
             {
@@ -28,6 +30,9 @@ namespace Escoba.App
             Seats = seats.ToArray();
             Teams = teams;
             Seed = seed;
+            PlayerNames = Enumerable.Range(0, seats.Count)
+                .Select(i => playerNames != null && i < playerNames.Count ? PlayerNameRules.Sanitize(playerNames[i]) : null)
+                .ToArray();
         }
 
         /// <summary>Reglas.</summary>
@@ -38,6 +43,9 @@ namespace Escoba.App
 
         /// <summary>Tipo de cada asiento.</summary>
         public IReadOnlyList<SeatType> Seats { get; }
+
+        /// <summary>Nombre elegido para cada asiento (ya saneado; null = nombre por defecto).</summary>
+        public IReadOnlyList<string> PlayerNames { get; }
 
         /// <summary>Partida por parejas (asientos 0-2 contra 1-3).</summary>
         public bool Teams { get; }
@@ -67,6 +75,6 @@ namespace Escoba.App
         }
 
         /// <summary>Misma configuración con otra semilla (null = aleatoria), para la revancha.</summary>
-        public MatchConfig WithSeed(ulong? seed) => new MatchConfig(Preset, Difficulty, Seats, Teams, seed);
+        public MatchConfig WithSeed(ulong? seed) => new MatchConfig(Preset, Difficulty, Seats, Teams, seed, PlayerNames);
     }
 }

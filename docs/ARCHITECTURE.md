@@ -76,7 +76,9 @@ sequenceDiagram
 | `PlaySelection` | Presentation | Lógica pura de la selección (candidatas, suma, confirmación, jugada rápida); testeada en EditMode. |
 | `CardView`, `HudView`, `SeatPanelView`, `RoundSummaryPanel`, `GameOverPanel`, `PassScreenPanel`, `SafeArea` | Presentation | Vistas uGUI. |
 | `SeatLayout` | Presentation | Hueco de pantalla de cada asiento respecto al que mira (abajo/derecha/arriba/izquierda). |
-| `MatchConfig`, `SeatType`, `PlayerNaming` | App | Asientos humano/IA, parejas y nombres visibles. |
+| `MatchConfig`, `SeatType`, `PlayerNaming` | App | Asientos humano/IA, nombres elegidos, parejas y nombres visibles. |
+| `SetupSelection`, `SetupPreferences` | App | Estado del panel "Nueva partida" y su persistencia por modo (`ISettingsStore`). |
+| `PlayerNameRules` | Core | Saneado de nombres (12 caracteres, sin `< > { } |`); en M6 lo aplicará también el Master Client a los nombres recibidos por red. |
 
 **Hot-seat (M3)**: con ≥2 humanos, `GameController` muestra `PassScreenPanel` antes de cada turno humano, llama a `TablePresenter.SetViewer(view, reveal: true)` (recoloca la mesa desde ese jugador a partir de su `PlayerView`) y, tras su jugada, `SetViewerHandRevealed(false)`. Los repartos al jugador que mira llegan boca abajo mientras no sea su turno. Con un solo humano, el punto de vista es fijo.
 | `CardSkin` | Presentation | Sprites por id de carta + dorso. |

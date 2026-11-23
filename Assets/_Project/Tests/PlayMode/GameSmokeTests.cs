@@ -151,6 +151,117 @@ namespace Escoba.Tests.PlayMode
             Assert.That(viewersSeen, Is.EquivalentTo(new[] { 0, 1 }), "ambos humanos deben haber jugado con su propia vista");
         }
 
+        [UnityTest]
+        public IEnumerator Menu_PlayerNames_AreUsedInGameAndRemembered()
+        {
+            string[] keys =
+            {
+                "escoba.setup.local.players", "escoba.setup.local.teams", "escoba.setup.local.seats",
+                "escoba.setup.name.0", "escoba.setup.name.1", "escoba.setup.name.2", "escoba.setup.name.3", "escoba.lastPreset",
+            };
+            Dictionary<string, string> backup = BackupPrefs(keys);
+            try
+            {
+                SceneManager.LoadScene(SceneNames.MainMenu);
+                yield return null;
+                yield return null;
+
+                foreach (string key in keys)
+                {
+                    PlayerPrefs.DeleteKey(key);
+                }
+
+                var menu = Object.FindFirstObjectByType<MainMenuController>();
+                menu.OpenSetup(true);
+                yield return null;
+                Assert.That(menu.Selection.PlayerCount, Is.EqualTo(2));
+                Assert.That(menu.Selection.HumanCount, Is.EqualTo(2));
+                FindInput("NameInput0").text = "  Laura  ";
+                FindInput("NameInput1").text = "Pablo<b>";
+                Assert.That(menu.Selection.Names[0], Is.EqualTo("Laura"));
+                Assert.That(menu.Selection.Names[1], Is.EqualTo("Pablob"));
+
+                menu.StartGame();
+                yield return WaitFor(() => SceneManager.GetActiveScene().name == SceneNames.Game, 5f);
+                yield return null;
+
+                var table = Object.FindFirstObjectByType<TablePresenter>();
+                Assert.That(table.SeatName(0), Is.EqualTo("Laura"));
+                Assert.That(table.SeatName(1), Is.EqualTo("Pablob"));
+
+                var pass = Object.FindFirstObjectByType<PassScreenPanel>(FindObjectsInactive.Include);
+                yield return WaitFor(() => pass.IsShown, 30f);
+                string title = pass.GetComponentInChildren<TMP_Text>().text;
+                Assert.That(title, Does.Contain("Laura").Or.Contain("Pablob"), "la pantalla de pase usa el nombre elegido");
+
+                // Al volver al menú, el modo "en este dispositivo" recuerda los nombres.
+                SceneManager.LoadScene(SceneNames.MainMenu);
+                yield return null;
+                yield return null;
+                menu = Object.FindFirstObjectByType<MainMenuController>();
+                menu.OpenSetup(true);
+                yield return null;
+                Assert.That(FindInput("NameInput0").text, Is.EqualTo("Laura"));
+            }
+            finally
+            {
+                RestorePrefs(backup);
+            }
+        }
+
+        private static TMP_InputField FindInput(string name)
+        {
+            foreach (TMP_InputField input in Object.FindObjectsByType<TMP_InputField>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (input.name == name)
+                {
+                    return input;
+                }
+            }
+
+            Assert.Fail($"No se encontró el campo {name}");
+            return null;
+        }
+
+        private static Dictionary<string, string> BackupPrefs(IEnumerable<string> keys)
+        {
+            var backup = new Dictionary<string, string>();
+            foreach (string key in keys)
+            {
+                if (PlayerPrefs.HasKey(key))
+                {
+                    backup[key] = PlayerPrefs.GetString(key, null) ?? PlayerPrefs.GetInt(key).ToString();
+                }
+                else
+                {
+                    backup[key] = null;
+                }
+            }
+
+            return backup;
+        }
+
+        private static void RestorePrefs(Dictionary<string, string> backup)
+        {
+            foreach (KeyValuePair<string, string> entry in backup)
+            {
+                if (entry.Value == null)
+                {
+                    PlayerPrefs.DeleteKey(entry.Key);
+                }
+                else if (int.TryParse(entry.Value, out int number) && !entry.Key.Contains("seats") && !entry.Key.Contains("name"))
+                {
+                    PlayerPrefs.SetInt(entry.Key, number);
+                }
+                else
+                {
+                    PlayerPrefs.SetString(entry.Key, entry.Value);
+                }
+            }
+
+            PlayerPrefs.Save();
+        }
+
         private static bool SummaryVisible() => Object.FindFirstObjectByType<RoundSummaryPanel>() != null;
     }
 }

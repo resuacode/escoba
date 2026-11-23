@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Escoba.AI;
+using Escoba.Core;
 using Escoba.Presentation;
 using TMPro;
 using UnityEngine;
@@ -11,13 +12,12 @@ namespace Escoba.App
 {
     /// <summary>
     /// Menú principal y panel "Nueva partida": número de jugadores (2-4), individual o por parejas
-    /// (solo con 4), quién ocupa cada asiento (humano o IA), reglas y dificultad.
-    /// "Jugar contra la IA" abre el panel con un humano y el resto IA; "Jugar en este dispositivo",
-    /// con todos humanos (hot-seat).
+    /// (solo con 4), quién ocupa cada asiento (humano o IA) y su nombre, reglas y dificultad.
+    /// "Jugar contra la IA" y "Jugar en este dispositivo" recuerdan cada uno su última configuración.
     /// </summary>
     public sealed class MainMenuController : MonoBehaviour
     {
-        private const int MaxPlayers = 4;
+        private const int MaxPlayers = SetupSelection.MaxPlayers;
 
         [Header("Menú")]
         [SerializeField] private GameObject _title;
@@ -36,7 +36,12 @@ namespace Escoba.App
         [Tooltip("Botones Individual y Por parejas.")]
         [SerializeField] private Button[] _modeButtons = new Button[2];
         [SerializeField] private GameObject[] _seatRows = new GameObject[MaxPlayers];
-        [SerializeField] private LocalizedText[] _seatLabels = new LocalizedText[MaxPlayers];
+        [Tooltip("Campo de nombre de cada asiento (visible si es humano).")]
+        [SerializeField] private TMP_InputField[] _nameInputs = new TMP_InputField[MaxPlayers];
+        [Tooltip("Texto de ayuda del campo de nombre (nombre por defecto).")]
+        [SerializeField] private LocalizedText[] _namePlaceholders = new LocalizedText[MaxPlayers];
+        [Tooltip("Nombre del asiento cuando es IA.")]
+        [SerializeField] private LocalizedText[] _botLabels = new LocalizedText[MaxPlayers];
         [SerializeField] private Button[] _seatButtons = new Button[MaxPlayers];
         [SerializeField] private Button[] _presetButtons = new Button[0];
         [SerializeField] private Button[] _difficultyButtons = new Button[0];
@@ -46,11 +51,13 @@ namespace Escoba.App
         [SerializeField] private Color _selectedColor = new Color(0.95f, 0.78f, 0.25f, 1f);
         [SerializeField] private Color _normalColor = Color.white;
 
-        private readonly SeatType[] _seats = new SeatType[MaxPlayers];
-        private int _playerCount = 2;
-        private bool _teams;
+        private SetupSelection _selection = SetupSelection.Default(false);
+        private bool _allHumansMode;
         private int _presetIndex;
         private BotDifficulty _difficulty = BotDifficulty.Easy;
+
+        /// <summary>Selección actual del panel (pruebas).</summary>
+        public SetupSelection Selection => _selection;
 
         private void Start()
         {
@@ -80,8 +87,12 @@ namespace Escoba.App
             for (int i = 0; i < MaxPlayers; i++)
             {
                 int seat = i;
-                _seatLabels[i].Set("player.human", i + 1);
+                _botLabels[i].Set("player.bot", i + 1);
                 _seatButtons[i].onClick.AddListener(() => ToggleSeat(seat));
+                TMP_InputField input = _nameInputs[i];
+                input.characterLimit = PlayerNameRules.MaxLength;
+                input.onValidateInput = (text, index, c) => PlayerNameRules.IsAllowedChar(c) ? c : '\0';
+                input.onValueChanged.AddListener(value => _selection.Names[seat] = PlayerNameRules.Sanitize(value));
             }
 
             IReadOnlyList<RulesPreset> presets = settings.Presets;
@@ -107,30 +118,52 @@ namespace Escoba.App
             _startButton.onClick.AddListener(StartGame);
             _backButton.onClick.AddListener(CloseSetup);
 
-            Localization.Changed += RefreshLanguageLabel;
+            Localization.Changed += OnLanguageChanged;
             RefreshLanguageLabel();
             CloseSetup();
         }
 
         private void OnDestroy()
         {
-            Localization.Changed -= RefreshLanguageLabel;
+            Localization.Changed -= OnLanguageChanged;
         }
 
-        /// <summary>Abre "Nueva partida": contra la IA (un humano) o en este dispositivo (todos humanos).</summary>
+        /// <summary>Abre "Nueva partida" con la última configuración del modo elegido.</summary>
         public void OpenSetup(bool allHumans)
         {
+            _allHumansMode = allHumans;
+            _selection = SetupPreferences.Load(AppContext.Store, allHumans);
             for (int i = 0; i < MaxPlayers; i++)
             {
-                _seats[i] = i == 0 || allHumans ? SeatType.Human : SeatType.Bot;
+                _nameInputs[i].SetTextWithoutNotify(_selection.Names[i] ?? string.Empty);
             }
 
-            _teams = false;
-            _playerCount = 2;
             _title.SetActive(false);
             _mainPanel.SetActive(false);
             _setupPanel.SetActive(true);
             Refresh();
+        }
+
+        /// <summary>Empieza la partida con la selección actual (si hay al menos un humano).</summary>
+        public void StartGame()
+        {
+            if (_selection.HumanCount == 0)
+            {
+                return;
+            }
+
+            GameSettings settings = AppContext.Settings;
+            AppContext.Store.SetInt(SettingsKeys.LastPreset, _presetIndex);
+            SetupPreferences.Save(AppContext.Store, _allHumansMode, _selection);
+            int count = _selection.PlayerCount;
+            AppContext.PendingMatch = new MatchConfig(
+                settings.Presets[_presetIndex],
+                _difficulty,
+                _selection.Seats.Take(count).ToArray(),
+                _selection.Teams,
+                null,
+                _selection.Names.Take(count).ToArray());
+            SceneManager.LoadScene(SceneNames.Game);
         }
 
         private void CloseSetup()
@@ -142,10 +175,10 @@ namespace Escoba.App
 
         private void SetPlayerCount(int count)
         {
-            _playerCount = count;
+            _selection.PlayerCount = count;
             if (count != MaxPlayers)
             {
-                _teams = false;
+                _selection.Teams = false;
             }
 
             Refresh();
@@ -153,13 +186,13 @@ namespace Escoba.App
 
         private void SetTeams(bool teams)
         {
-            _teams = teams && _playerCount == MaxPlayers;
+            _selection.Teams = teams && _selection.PlayerCount == MaxPlayers;
             Refresh();
         }
 
         private void ToggleSeat(int seat)
         {
-            _seats[seat] = _seats[seat] == SeatType.Human ? SeatType.Bot : SeatType.Human;
+            _selection.Seats[seat] = _selection.Seats[seat] == SeatType.Human ? SeatType.Bot : SeatType.Human;
             Refresh();
         }
 
@@ -179,18 +212,23 @@ namespace Escoba.App
         {
             for (int i = 0; i < _playerCountButtons.Length; i++)
             {
-                _playerCountButtons[i].image.color = i + 2 == _playerCount ? _selectedColor : _normalColor;
+                _playerCountButtons[i].image.color = i + 2 == _selection.PlayerCount ? _selectedColor : _normalColor;
             }
 
-            _modeButtons[0].image.color = _teams ? _normalColor : _selectedColor;
-            _modeButtons[1].image.color = _teams ? _selectedColor : _normalColor;
-            _modeButtons[1].interactable = _playerCount == MaxPlayers;
+            _modeButtons[0].image.color = _selection.Teams ? _normalColor : _selectedColor;
+            _modeButtons[1].image.color = _selection.Teams ? _selectedColor : _normalColor;
+            _modeButtons[1].interactable = _selection.PlayerCount == MaxPlayers;
 
+            int humans = _selection.HumanCount;
             for (int i = 0; i < MaxPlayers; i++)
             {
-                _seatRows[i].SetActive(i < _playerCount);
-                _seatButtons[i].GetComponentInChildren<LocalizedText>().Set(_seats[i] == SeatType.Human ? "setup.seat.human" : "setup.seat.bot");
-                _seatButtons[i].image.color = _seats[i] == SeatType.Human ? _selectedColor : _normalColor;
+                bool human = _selection.Seats[i] == SeatType.Human;
+                _seatRows[i].SetActive(i < _selection.PlayerCount);
+                _nameInputs[i].gameObject.SetActive(human);
+                _botLabels[i].gameObject.SetActive(!human);
+                _namePlaceholders[i].Set(humans == 1 ? "game.you" : "player.human", i + 1);
+                _seatButtons[i].GetComponentInChildren<LocalizedText>().Set(human ? "setup.seat.human" : "setup.seat.bot");
+                _seatButtons[i].image.color = human ? _selectedColor : _normalColor;
             }
 
             for (int i = 0; i < _presetButtons.Length; i++)
@@ -203,9 +241,18 @@ namespace Escoba.App
                 _difficultyButtons[i].image.color = i == (int)_difficulty ? _selectedColor : _normalColor;
             }
 
-            bool hasHuman = _seats.Take(_playerCount).Any(s => s == SeatType.Human);
+            bool hasHuman = humans > 0;
             _needHumanMessage.SetActive(!hasHuman);
             _startButton.interactable = hasHuman;
+        }
+
+        private void OnLanguageChanged()
+        {
+            RefreshLanguageLabel();
+            if (_setupPanel.activeSelf)
+            {
+                Refresh();
+            }
         }
 
         private void CycleLanguage()
@@ -231,15 +278,6 @@ namespace Escoba.App
             {
                 _languageLabel.text = $"{service.Get("menu.language")}: {service.GetLanguageName(service.CurrentLanguage)}";
             }
-        }
-
-        private void StartGame()
-        {
-            GameSettings settings = AppContext.Settings;
-            AppContext.Store.SetInt(SettingsKeys.LastPreset, _presetIndex);
-            AppContext.Store.Save();
-            AppContext.PendingMatch = new MatchConfig(settings.Presets[_presetIndex], _difficulty, _seats.Take(_playerCount).ToArray(), _teams);
-            SceneManager.LoadScene(SceneNames.Game);
         }
     }
 }

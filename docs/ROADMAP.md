@@ -47,7 +47,8 @@ Estado: **M0–M3 completados; siguiente M4** · Última actualización: 2026-11
 - [x] Mezcla humanos/IA por asiento en "Nueva partida" (número de jugadores, individual/por parejas, Humano/IA por asiento)
 - [x] Textos nuevos en es/gl/en (gallego revisado con el DRAG)
 - [x] 141 tests EditMode + 6 PlayMode (partidas completas 2/3/4/parejas y hot-seat) en verde (2026-11-23)
-- [ ] Pendiente: nombres personalizados de jugadores (campo de texto) y recordar la última configuración de asientos
+- [x] Nombres de jugador en "Nueva partida" (máx. 12 caracteres, saneados con `PlayerNameRules`) y recuerdo de la última configuración por modo (`SetupPreferences`)
+- [x] 159 tests EditMode + 7 PlayMode en verde (2026-11-23)
 
 ## M4 — IA Media y Difícil
 - [ ] Heurística Media con pesos configurables
