@@ -1,0 +1,36 @@
+# Finales de línea: LF en el repositorio y en la copia de trabajo (Unity y los IDE lo manejan bien).
+* text=auto eol=lf
+
+# Scripts de Windows necesitan CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Ficheros YAML de Unity: texto, fusión con UnityYAMLMerge si está configurada
+# (ver https://docs.unity3d.com/Manual/SmartMerge.html).
+*.unity       text eol=lf merge=unityyamlmerge
+*.prefab      text eol=lf merge=unityyamlmerge
+*.asset       text eol=lf merge=unityyamlmerge
+*.meta        text eol=lf
+*.mat         text eol=lf merge=unityyamlmerge
+*.anim        text eol=lf merge=unityyamlmerge
+*.controller  text eol=lf merge=unityyamlmerge
+*.spriteatlasv2 text eol=lf
+
+# Binarios
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.psd   binary
+*.tga   binary
+*.gif   binary
+*.ttf   binary
+*.otf   binary
+*.wav   binary
+*.mp3   binary
+*.ogg   binary
+*.dll   binary
+*.so    binary
+*.a     binary
+*.zip   binary
+*.fbx   binary
