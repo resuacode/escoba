@@ -40,8 +40,12 @@ Decisiones:
 - El tope del mazo es el final de la lista; se reparte de una en una empezando por el mano.
 - Los tests acceden a los miembros `internal` (`InternalsVisibleTo("Escoba.Tests.EditMode")`) para construir estados explícitos con `TestGame.Create` y la notación corta de cartas (`"7o"`, `"10b"`).
 
-## IA (implementado en M1: nivel Fácil)
-`Escoba.AI`: `IBotStrategy.ChooseCommand(PlayerView view, IRandom rng) → PlayCardCommand`; `EasyBot` juega una carta al azar y captura (obligatoriamente, o con un 60% si la regla está desactivada).
+## IA (Fácil en M1; Medio y Difícil en M4)
+`Escoba.AI`: `IBotStrategy.ChooseCommand(PlayerView view, IRandom rng) → PlayCardCommand`.
+- `EasyBot`: carta al azar; captura obligatoria con combinación al azar.
+- `MediumBot`: `MoveScoring.ImmediateGain` (escoba, 7 de oros, sietes, oros, cartas, setenta) − riesgos simples (dejar escoba, dejar sietes/oros).
+- `HardBot`: ganancia inmediata − `OpponentFactor` × media de la mejor respuesta del siguiente rival sobre manos muestreadas entre las cartas no vistas (`BotKnowledge`).
+- Pesos en `HeuristicWeights`; `BotFactory` por nivel; `BotTournament` para balance (C# puro, sin Unity).
 
 ## Flujo de una jugada
 ```mermaid

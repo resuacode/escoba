@@ -1,6 +1,6 @@
 # Roadmap
 
-Estado: **M0–M3 completados; siguiente M4** · Última actualización: 2026-11-23
+Estado: **M0–M4 completados; siguiente M5** · Última actualización: 2026-11-23
 
 ## M0 — Setup del proyecto
 - [x] CLAUDE.md, skills de proyecto y `.mcp.json`
@@ -51,9 +51,12 @@ Estado: **M0–M3 completados; siguiente M4** · Última actualización: 2026-11
 - [x] 159 tests EditMode + 7 PlayMode en verde (2026-11-23)
 
 ## M4 — IA Media y Difícil
-- [ ] Heurística Media con pesos configurables
-- [ ] Difícil con conteo de cartas y Monte Carlo
-- [ ] Torneos de balance y tabla en GDD §9
+- [x] Heurística Media con pesos configurables (`HeuristicWeights`, `MoveScoring`)
+- [x] Difícil con conteo de cartas y Monte Carlo (`BotKnowledge`, `HardBot`)
+- [x] Torneos de balance (`BotTournament`, menú `Escoba/AI/Run Balance Tournament`) y tabla en GDD §9: Medio 98,5 % vs Fácil, Difícil 80 % vs Medio
+- [x] Dificultades Media y Difícil activadas en "Nueva partida"
+- [x] 178 tests EditMode (incl. `BotTests`, `BalanceTests`) + 8 PlayMode en verde (2026-11-23)
+- [ ] Pendiente (M5): medir tiempos en móvil/WebGL; valorar un Fácil algo más fuerte según playtests
 
 ## M5 — Pulido
 - [ ] Audio, partículas, "¡Escoba!"

@@ -265,8 +265,21 @@ namespace Escoba.Presentation
 
             _selection = null;
             _submit = null;
+
+            // Al descargar la escena (p. ej. botón Menú en mitad de un turno) los objetos pueden
+            // estar ya destruidos: entonces solo se limpia el estado, sin tocar la parte visual.
+            if (!IsSceneAlive())
+            {
+                return;
+            }
+
             foreach (CardView view in _faceViews.Values)
             {
+                if (view == null)
+                {
+                    continue;
+                }
+
                 view.DragEnabled = false;
                 view.SetHighlight(CardHighlight.None);
                 view.SetDimmed(false);
@@ -339,6 +352,11 @@ namespace Escoba.Presentation
         }
 
         // ---- Modelo y colocación ----
+
+        private bool IsSceneAlive()
+        {
+            return this != null && _cardLayer != null && _hud != null && _handAnchors[SeatLayout.Bottom] != null;
+        }
 
         private int SlotOf(int seat) => SeatLayout.SlotOf(seat, _viewer, PlayerCount);
 

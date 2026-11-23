@@ -3,6 +3,17 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+### Added — M4: IA Media y Difícil
+- `MediumBot`: heurística con pesos configurables (`HeuristicWeights`): escobas, siete de oros, sietes, oros, cartas y mejora de la setenta; penaliza dejar escoba o sietes/oros al rival.
+- `HardBot`: conteo de cartas no vistas (`BotKnowledge`) y muestreo Monte Carlo de la mano del siguiente rival para restar su mejor respuesta.
+- `MoveScoring`, `BotGuard`, `BotTournament`/`TournamentResult` y menú `Escoba/AI/Run Balance Tournament` (tabla Markdown para el GDD).
+- Dificultades Media y Difícil disponibles en "Nueva partida".
+- Balance (400 partidas): Medio gana al Fácil el 98,5 %; Difícil gana al Medio el 80 %; ~0,16 ms por decisión del Difícil en editor.
+- Tests: `BotTests` (comportamiento, legalidad en partidas completas, probabilidades) y `BalanceTests` (`[Category("Slow")]`); las partidas automáticas de PlayMode usan Fácil, Medio y Difícil.
+
+### Fixed
+- Salir al menú (botón "Menú") durante el turno de un humano lanzaba `MissingReferenceException` al recolocar la mano con la escena ya descargada. `TablePresenter.EndHumanTurn` ya no toca la parte visual si la escena está destruida. Test de regresión `Game_LeavingToMenuMidTurnOrMidAnimation_DoesNotThrow`.
+
 ### Added — M3: hot-seat, 3-4 jugadores y parejas
 - "Jugar en este dispositivo" activado. "Nueva partida" permite elegir 2, 3 o 4 jugadores, individual o por parejas (con 4) y Humano/IA en cada asiento (al menos un humano).
 - Pantalla de pase opaca antes de cada turno humano cuando hay varios humanos, con la última jugada ("X jugó el 5 de copas y se llevó 2 cartas"); la mano solo se ve durante el turno de su dueño.

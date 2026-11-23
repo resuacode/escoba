@@ -180,12 +180,22 @@ Volumen música/efectos, velocidad de animación, idioma, modo daltónico, tama�
 Detalle de diseño e implementación: skill [`escoba-ai`](../.claude/skills/escoba-ai/SKILL.md).
 | Nivel | Comportamiento | Objetivo de balance |
 |---|---|---|
-| Fácil | Jugada legal aleatoria con ligera preferencia por capturar | Aprendices ganan a menudo |
-| Medio | Heurística: prioriza escobas, 7 de oros, sietes, oros; evita dejar escobas fáciles | Gana a Fácil > 75% |
-| Difícil | Medio + conteo de cartas y simulación Monte Carlo | Gana a Medio > 60% |
+| Fácil | Carta al azar; captura (obligatoria) con combinación al azar | Aprendices ganan a menudo |
+| Medio | Heurística: escobas, 7 de oros, sietes, oros, cartas y mejora de la setenta; resta el riesgo de dejar escoba o sietes/oros al rival | Gana a Fácil > 75% |
+| Difícil | Heurística + conteo de cartas no vistas + muestreo Monte Carlo de la mano del siguiente rival (24 muestras) restando su mejor respuesta | Gana a Medio > 60% |
 - La IA solo ve su `PlayerView` (no hace trampas).
-- Tiempo de "pensar" simulado 0,6‑1,2 s (escalado por la velocidad de animación).
-- **Tabla de balance:** se rellenará con resultados de simulación (M4).
+- Tiempo de "pensar" simulado 0,6‑1,1 s (escalado por la velocidad de animación).
+- Pesos en `HeuristicWeights` (Escoba 100, siete de oros 40, siete 12, oro 6, carta 2, setenta 3/paso + 6 por palo nuevo, factor rival 0,8).
+
+**Tabla de balance** (2026-11-23, 1 contra 1 a 21 puntos, 400 partidas por enfrentamiento alternando asientos; menú `Escoba/AI/Run Balance Tournament`):
+
+| Enfrentamiento | % victorias A | Puntos/ronda A–B | Escobas/ronda A–B | ms/decisión A (editor) |
+|---|---|---|---|---|
+| Medio vs Fácil | 98,5 % | 3,84 – 1,58 | 1,23 – 0,47 | 0,01 |
+| Difícil vs Medio | 80,0 % | 3,19 – 2,28 | 0,89 – 0,89 | 0,16 (pico aislado 50 ms por calentamiento/GC) |
+| Difícil vs Fácil | 99,8 % | 4,19 – 1,28 | 1,25 – 0,48 | 0,16 |
+
+Lectura: los objetivos se cumplen con margen. El nivel Fácil resulta muy débil frente a los otros dos (adecuado para aprender); si los playtests muestran que es demasiado fácil, se puede añadir un nivel intermedio o subir su probabilidad de jugadas "sensatas". Pendiente medir en dispositivo móvil y WebGL (M5).
 
 ## 10. Arte
 - **2D, uGUI.** Mesa: tapete verde con textura sutil (o madera, seleccionable más adelante).

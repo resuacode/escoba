@@ -20,8 +20,8 @@ namespace Escoba.Tests.PlayMode
     {
         private const float GameTimeoutSeconds = 150f;
 
-        // { jugadores, parejas (0/1) }
-        private static readonly int[][] BotConfigurations = { new[] { 2, 0 }, new[] { 3, 0 }, new[] { 4, 0 }, new[] { 4, 1 } };
+        // { jugadores, parejas (0/1), dificultad (0 Fácil, 1 Medio, 2 Difícil) }
+        private static readonly int[][] BotConfigurations = { new[] { 2, 0, 0 }, new[] { 3, 0, 1 }, new[] { 4, 0, 2 }, new[] { 4, 1, 2 } };
 
         private static RulesPreset DefaultPreset()
         {
@@ -84,9 +84,10 @@ namespace Escoba.Tests.PlayMode
         {
             int players = configuration[0];
             bool teams = configuration[1] == 1;
+            var difficulty = (BotDifficulty)configuration[2];
             yield return EnsureAppContext();
             GameController controller = null;
-            yield return LoadGame(MatchConfig.Versus(DefaultPreset(), BotDifficulty.Easy, players, teams), true, 40f, c => controller = c);
+            yield return LoadGame(MatchConfig.Versus(DefaultPreset(), difficulty, players, teams), true, 40f, c => controller = c);
 
             yield return WaitFor(() => controller.State != null && controller.State.Phase == GamePhase.GameOver, GameTimeoutSeconds);
 
@@ -151,16 +152,37 @@ namespace Escoba.Tests.PlayMode
             Assert.That(viewersSeen, Is.EquivalentTo(new[] { 0, 1 }), "ambos humanos deben haber jugado con su propia vista");
         }
 
+        // Preferencias que tocan los tests de menú: se guardan antes y se restauran en TearDown
+        // (que se ejecuta aunque el test falle) para no alterar las preferencias del desarrollador.
+        private static readonly string[] MenuPrefKeys =
+        {
+            "escoba.setup.local.players", "escoba.setup.local.teams", "escoba.setup.local.seats",
+            "escoba.setup.ai.players", "escoba.setup.ai.teams", "escoba.setup.ai.seats",
+            "escoba.setup.name.0", "escoba.setup.name.1", "escoba.setup.name.2", "escoba.setup.name.3", "escoba.lastPreset",
+        };
+
+        private Dictionary<string, string> _prefsBackup;
+
+        [SetUp]
+        public void BackupMenuPrefs()
+        {
+            _prefsBackup = BackupPrefs(MenuPrefKeys);
+        }
+
+        [TearDown]
+        public void RestoreMenuPrefs()
+        {
+            if (_prefsBackup != null)
+            {
+                RestorePrefs(_prefsBackup);
+                _prefsBackup = null;
+            }
+        }
+
         [UnityTest]
         public IEnumerator Menu_PlayerNames_AreUsedInGameAndRemembered()
         {
-            string[] keys =
-            {
-                "escoba.setup.local.players", "escoba.setup.local.teams", "escoba.setup.local.seats",
-                "escoba.setup.name.0", "escoba.setup.name.1", "escoba.setup.name.2", "escoba.setup.name.3", "escoba.lastPreset",
-            };
-            Dictionary<string, string> backup = BackupPrefs(keys);
-            try
+            string[] keys = MenuPrefKeys;
             {
                 SceneManager.LoadScene(SceneNames.MainMenu);
                 yield return null;
@@ -203,10 +225,38 @@ namespace Escoba.Tests.PlayMode
                 yield return null;
                 Assert.That(FindInput("NameInput0").text, Is.EqualTo("Laura"));
             }
-            finally
-            {
-                RestorePrefs(backup);
-            }
+        }
+
+        [UnityTest]
+        public IEnumerator Game_LeavingToMenuMidTurnOrMidAnimation_DoesNotThrow()
+        {
+            yield return EnsureAppContext();
+
+            // 1) Durante el turno del humano.
+            GameController controller = null;
+            yield return LoadGame(MatchConfig.Versus(DefaultPreset(), BotDifficulty.Hard, 4, true), false, 4f, c => controller = c);
+            var table = Object.FindFirstObjectByType<TablePresenter>();
+            yield return WaitFor(() => table.IsWaitingForHuman, 30f);
+            Assert.That(table.IsWaitingForHuman, Is.True);
+            ClickMenuButton();
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == SceneNames.MainMenu, 5f);
+            yield return null;
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(SceneNames.MainMenu));
+
+            // 2) En mitad de las animaciones (partida automática a velocidad normal).
+            yield return LoadGame(MatchConfig.Versus(DefaultPreset(), BotDifficulty.Medium, 3), true, 1f, c => controller = c);
+            yield return new WaitForSeconds(1.5f);
+            ClickMenuButton();
+            yield return WaitFor(() => SceneManager.GetActiveScene().name == SceneNames.MainMenu, 5f);
+            yield return null;
+            Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(SceneNames.MainMenu));
+        }
+
+        private static void ClickMenuButton()
+        {
+            var menuButton = Object.FindFirstObjectByType<GameMenuButton>();
+            Assert.That(menuButton, Is.Not.Null);
+            menuButton.GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
         }
 
         private static TMP_InputField FindInput(string name)
