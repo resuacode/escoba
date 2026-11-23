@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e30d984cb5e9f384c9e505d8280b0caa, type: 3}
+  m_Name: GameSettings
+  m_EditorClassIdentifier: Escoba.App::Escoba.App.GameSettings
+  _cardSkin: {fileID: 11400000, guid: 8cbeeb1fc106a044c89abde1d1da6108, type: 2}
+  _presets:
+  - {fileID: 11400000, guid: 5b73590bdffb8b74eaf9514b095a3f51, type: 2}
+  - {fileID: 11400000, guid: 9fb3d143ba78a7f4b929662d29e19c8a, type: 2}
+  - {fileID: 11400000, guid: 8d73006e9abcb0744ad18a4e2767f6df, type: 2}
+  _defaultPresetIndex: 0
+  _languages:
+  - {fileID: 4900000, guid: 1456b28e84d54b74ca132c436e04abf7, type: 3}
+  - {fileID: 4900000, guid: 09831047c9ab60b40b34161d9e41e2f5, type: 3}
+  - {fileID: 4900000, guid: 1912797ed84db994c856b32d7b4af619, type: 3}
+  _botThinkSecondsMin: 0.6
+  _botThinkSecondsMax: 1.1
+  _animationSpeed: 1

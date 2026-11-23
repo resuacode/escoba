@@ -39,12 +39,12 @@ Se descartan 8, 9, 10, jokers y `card_empty`.
 - Resto (baraja propia): Bilinear, compresión automática, Max Size 1024.
 El postprocesador **sobrescribe** estos ajustes en cada reimportación; para cambiarlos, edita el postprocesador, no el Inspector.
 
-## Herramienta de editor (Escoba.Editor)
-Menú `Escoba/Cards/Generate Card Skin...`:
-1. Elegir carpeta (todas usan la convención `Spanish`).
-2. Buscar los 40 sprites + dorso; error claro listando los que faltan.
-3. Crear/actualizar `Assets/_Project/Data/CardSkins/CardSkin_<Nombre>.asset`.
-Menú `Escoba/Cards/Validate Active Card Skin`: comprueba 40 caras no nulas, dorso, mismo tamaño/aspecto.
+## Herramienta de editor (Escoba.Editor) — implementada en M2
+`Escoba.Editor.Cards.CardSkinGenerator`:
+- Menú `Escoba/Cards/Generate Card Skin...`: elige carpeta (convención española); crea/actualiza `Assets/_Project/Data/CardSkins/CardSkin_<NombreCarpeta>.asset`; si faltan imágenes, las lista. Programático: `CardSkinGenerator.Generate(folder, name, pixelArt, author, license)`.
+- Menú `Escoba/Cards/Validate Active Card Skin`: 40 caras, dorso y tamaño uniforme (`CardSkinGenerator.Validate(skin)`).
+- El skin activo está en `Assets/_Project/Data/GameSettings.asset` (campo `Card Skin`). `DefaultAssetsBuilder` (menú `Escoba/Build/...`) asigna `CardSkin_Kenney`: si cambias de baraja, actualiza también `DefaultAssetsBuilder.CreateAll` o volverá a poner Kenney al reconstruir.
+- Test: `ProjectAssetsTests.ActiveCardSkin_IsComplete`.
 
 ## Ajustes de importación recomendados para la baraja propia (aplicar con `manage_asset` o un `AssetPostprocessor` para `Art/Cards/Spanish`; Kenney usa el perfil pixel art de arriba)
 - Texture Type: Sprite (2D and UI), Sprite Mode: Single, Mesh Type: Full Rect.

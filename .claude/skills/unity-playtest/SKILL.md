@@ -13,7 +13,11 @@ Argumento opcional: qué verificar (p. ej. "pantalla de pase en hot-seat").
 3. Limpia la consola (`read_console` con acción de limpiar) para leer solo lo nuevo.
 
 ## Ejecución
-1. `manage_editor` → entrar en Play Mode.
+0. Si cambiaste maquetación o assets: `execute_menu_item` → `Escoba/Build/Rebuild All (assets + scenes)`.
+1. `manage_editor` → entrar en Play Mode. Comprueba con `execute_code` que `EditorApplication.isPaused` es false (el editor puede arrancar o quedarse en pausa tras una captura); si no, pon `EditorApplication.isPaused = false`.
+   - Capturas: `manage_camera` (`screenshot`, `include_image`) o, si sale sin UI, `execute_code` con `ScreenCapture.CaptureScreenshot("Screenshots/<nombre>.png")`, espera 1-2 s y léela con Read (`Screenshots/` está en `.gitignore`).
+   - Interacción simulada: por reflexión sobre `TablePresenter._selection` (`SelectHandCard`, `ToggleTableCard`) y `HudView.PlayButton.onClick.Invoke()`; navegación con `GameObject.Find("<Botón>").GetComponent<Button>().onClick.Invoke()`.
+   - Partida automática: test PlayMode `GameSmokeTests` o `GameController.ConfigureAutoPlay(true, velocidad)` antes de `Start`.
 2. Si existe el menú de depuración, úsalo con `execute_menu_item`:
    - `Escoba/Debug/Start Bot vs Bot` — partida automática acelerada.
    - `Escoba/Debug/Capture Screenshot` — guarda captura en `Screenshots/` (fuera de Assets).

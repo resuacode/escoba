@@ -142,3 +142,6 @@ crashlytics-build.properties
 
 # Resultados de tests en CLI
 /TestResults/
+
+# Capturas de pantalla de pruebas (MCP / ScreenCapture)
+/Screenshots/

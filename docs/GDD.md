@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión del documento** | 0.3.0 |
+| **Versión del documento** | 0.4.0 |
 | **Fecha** | 2026-11-23 |
 | **Estado** | Borrador inicial (hito M0) |
 | **Motor** | Unity 6000.3.11f1 · uGUI · URP |
@@ -218,9 +218,9 @@ Detalle de diseño e implementación: skill [`escoba-ai`](../.claude/skills/esco
 - Objetivos táctiles ≥ 48 dp; jugable con una mano en móvil horizontal.
 
 ## 14. Localización
-- Idiomas: **español** (base, desde M2) e **inglés** (M5).
+- Idiomas: **español** (base), **gallego** e **inglés**, disponibles desde M2. El gallego sigue la norma RAG (decisiones y fuentes en [LOCALIZATION.md](LOCALIZATION.md)).
 - **Sistema propio con JSON** (decidido 2026-11-23), sin el paquete oficial:
-  - Un fichero por idioma: `Assets/_Project/Localization/es.json`, `en.json` (cargados como `TextAsset`, compatible con WebGL).
+  - Un fichero por idioma: `Assets/_Project/Localization/es.json`, `gl.json`, `en.json` (cargados como `TextAsset`, compatible con WebGL).
   - Formato compatible con `JsonUtility`: `{ "language": "es", "entries": [ { "key": "menu.play_ai", "value": "Jugar contra la IA" } ] }`.
   - Parámetros con `{0}`, `{1}` (`string.Format`): `"pass.to_player": "Pasa el dispositivo a {0}"`.
   - Plurales por convención de claves `.one` / `.other` (`"hud.cards.one": "{0} carta"`, `"hud.cards.other": "{0} cartas"`).
@@ -284,3 +284,4 @@ Detalle de diseño e implementación: skill [`escoba-ai`](../.claude/skills/esco
 | 0.1.0 | 2026-11-23 | Documento inicial: visión, reglas, modos, configuración, pantallas, UX, IA, arte, audio, accesibilidad, online. |
 | 0.2.0 | 2026-11-23 | Setenta clásica como única regla de sietes; móvil solo horizontal; recomendación Photon Fusion 2; arte Kenney analizado (pixel art). |
 | 0.3.0 | 2026-11-23 | Captura obligatoria por defecto; Photon Fusion 2 decidido; localización propia con JSON. |
+| 0.4.0 | 2026-11-23 | M2 implementado: mesa 1v1, menú y configuración; gallego añadido como tercer idioma. |

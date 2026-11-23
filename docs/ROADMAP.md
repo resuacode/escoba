@@ -1,6 +1,6 @@
 # Roadmap
 
-Estado: **M0 y M1 completados; siguiente M2** · Última actualización: 2026-11-23
+Estado: **M0, M1 y M2 completados; siguiente M3** · Última actualización: 2026-11-23
 
 ## M0 — Setup del proyecto
 - [x] CLAUDE.md, skills de proyecto y `.mcp.json`
@@ -28,14 +28,17 @@ Estado: **M0 y M1 completados; siguiente M2** · Última actualización: 2026-11
 - [x] Bot Fácil (`EasyBot`) y simulación bot‑vs‑bot en EditMode
 
 ## M2 — Mesa 2D 1v1 PvE
-- [ ] `RulesPreset` (ScriptableObject) → `RulesConfig`: Clásica 21, Rápida 15, Larga 31
-- [ ] `CardSkin` + herramienta de editor + skin Kenney
-- [ ] Escena `Game`: mesa, manos, mazo, bazas, marcador (uGUI responsive)
-- [ ] Selección de carta y combinación (ratón/táctil), arrastre
-- [ ] Cola de eventos y animaciones básicas
-- [ ] Resumen de ronda y fin de partida
-- [ ] Menú principal y configuración de partida (presets)
-- [ ] Localización propia: `LocalizationService`, `LocalizedText`, `es.json` y test de claves
+- [x] `RulesPreset` (ScriptableObject) → `RulesConfig`: Clásica 21, Rápida 15, Larga 31
+- [x] `CardSkin` + `CardSkinGenerator` (menú) + skin Kenney validado (40/40)
+- [x] Escena `Game`: mesa, manos, mazo, bazas, marcador (uGUI responsive, safe area)
+- [x] Selección de carta y combinación (clic/toque, doble toque, arrastre a la mesa)
+- [x] Reproducción de eventos con animaciones básicas y comprobación mesa ↔ motor
+- [x] Resumen de ronda y fin de partida (revancha / menú)
+- [x] Menú principal y configuración de partida (presets, dificultad)
+- [x] Localización propia: `LocalizationService`, `LocalizedText`, `es.json`, `gl.json` (revisado con el DRAG), `en.json` y tests
+- [x] Escenas generadas por código (`Escoba/Build/Rebuild All`)
+- [x] 126 tests EditMode + 2 PlayMode (partida completa bot‑vs‑bot en la escena real) en verde (2026-11-23)
+- [ ] Pendiente de M5: arte de mesa definitivo, iconos y revisión en resoluciones móviles reales
 
 ## M3 — Hot‑seat, 3‑4 jugadores y parejas
 - [ ] `HumanLocalController` múltiple + pantalla de pase
@@ -49,7 +52,7 @@ Estado: **M0 y M1 completados; siguiente M2** · Última actualización: 2026-11
 
 ## M5 — Pulido
 - [ ] Audio, partículas, "¡Escoba!"
-- [ ] Ajustes, accesibilidad, traducción al inglés (`en.json`) y selector de idioma
+- [ ] Pantalla de ajustes y accesibilidad (idiomas es/gl/en ya disponibles desde M2)
 - [ ] Tutorial y "Cómo se juega"
 - [ ] Builds Windows, Android, iOS, WebGL y optimización
 - [ ] Sustitución por la baraja española propia

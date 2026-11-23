@@ -3,6 +3,19 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+### Added — M2: mesa 2D 1 contra 1 contra la IA
+- Escena `Game` jugable: reparto animado, mano propia, dorsos del rival, mesa, mazo, bazas, escobas, marcador, turno, aviso "¡Escoba!", resumen de ronda y fin de partida con revancha.
+- Interacción con ratón y táctil: seleccionar carta (las capturas posibles se resaltan y el resto se oscurece), marcar cartas de la mesa, suma "x/15", botones Jugar/Deshacer, doble toque y arrastre a la mesa para jugar directamente.
+- Menú principal y panel "Nueva partida" (Clásica 21, Rápida 15, Larga 31; dificultad Fácil) con selector de idioma.
+- Localización propia en JSON: español, gallego (revisado con el DRAG y las Normas RAG 2012; ver `docs/LOCALIZATION.md`) e inglés.
+- `GameController` (bucle de partida), `IPlayerController` con `HumanLocalController` y `AIController`, `TablePresenter`, `HudView`, `PlaySelection`, `CardView`, `CardSkin`, `RulesPreset`, `GameSettings`, `AppContext`, `SafeArea`.
+- Herramientas de editor: `Escoba/Build/Rebuild All` (assets por defecto + escenas + prefab de carta), `Escoba/Cards/Generate Card Skin...`, `Escoba/Cards/Validate Active Card Skin`.
+- Recursos esenciales de TextMeshPro importados.
+- Tests: `PlaySelectionTests`, `LocalizationTests`, `ProjectAssetsTests` (EditMode) y `GameSmokeTests` (PlayMode). Total: 126 EditMode + 2 PlayMode.
+
+### Changed
+- `PlayerSettings.runInBackground = true` (la partida sigue sin foco; necesario también para probar con el editor en segundo plano).
+
 ### Added — M1: núcleo de reglas
 - `Escoba.Core`: `Card`, `Suit`, `Deck`, `Pcg32Random`, `RulesConfig`, `GameState`, `GameEngine`, `LegalMoves`, `Setenta`, `RoundScorer`, `PlayerView`, comandos (`PlayCardCommand`, `StartNextRoundCommand`) y eventos de partida.
 - Reglas implementadas: reparto 3+4, escoba en el reparto (15 o 30), captura a 15 con elección de combinación, captura obligatoria, escobas, última jugada, mesa al último que captura, puntuación (escobas, cartas, oros, siete de oros, setenta clásica, bonificaciones opcionales), fin de partida sin empate en cabeza, 2-4 jugadores y parejas.

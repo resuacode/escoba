@@ -19,6 +19,7 @@ description: Sincroniza la documentación del proyecto Escoba (README.md, docs/G
 | Progreso de hito | `docs/ROADMAP.md` (marcar `[x]`, mover tareas) |
 | Puesta en marcha, requisitos, paquetes, builds, créditos | `README.md` |
 | Arte de cartas / CardSkin | `docs/CARD_ART_REPLACEMENT.md` y skill `card-skin` |
+| Textos, idiomas o términos en gallego | `docs/LOCALIZATION.md` (decisiones normativas y fuentes) |
 | Convenciones o flujo de trabajo de Claude | `CLAUDE.md` (mantenerlo conciso) |
 
 ## 3. Reglas

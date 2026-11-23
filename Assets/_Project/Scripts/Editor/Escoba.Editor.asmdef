@@ -1,7 +1,7 @@
 {
     "name": "Escoba.Editor",
     "rootNamespace": "Escoba.Editor",
-    "references": ["Escoba.Core", "Escoba.Presentation", "Escoba.App"],
+    "references": ["Escoba.Core", "Escoba.AI", "Escoba.Presentation", "Escoba.App", "UnityEngine.UI", "Unity.TextMeshPro", "Unity.InputSystem"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -67,6 +67,21 @@ sequenceDiagram
 - `CardSkin` → sprites por id de carta + dorso. Ver [CARD_ART_REPLACEMENT.md](CARD_ART_REPLACEMENT.md).
 - `GameSettings` → skin activo, presets disponibles, tiempos de animación.
 
+## Presentación y App (implementado en M2)
+| Tipo | Ensamblado | Responsabilidad |
+|---|---|---|
+| `GameController` | App | Bucle de partida: crea `GameEngine` y un `IPlayerController` por asiento, pide jugadas, valida/aplica y entrega los eventos a la mesa. Muestra resumen y fin de partida. Registra la semilla en consola. |
+| `IPlayerController` | Core | `RequestCommand(PlayerView, Action<PlayCardCommand>)`; implementado por `HumanLocalController` (Presentation) y `AIController` (AI). El retardo de "pensar" lo añade `GameController`. |
+| `TablePresenter` | Presentation | Reproduce eventos con animaciones (corrutinas) sobre un modelo visual propio alimentado solo con eventos públicos y la mano local; `FindInconsistency(view)` lo compara con el motor tras cada jugada (error en consola si difiere). Gestiona la interacción humana. |
+| `PlaySelection` | Presentation | Lógica pura de la selección (candidatas, suma, confirmación, jugada rápida); testeada en EditMode. |
+| `CardView`, `HudView`, `RoundSummaryPanel`, `GameOverPanel`, `SafeArea` | Presentation | Vistas uGUI. |
+| `CardSkin` | Presentation | Sprites por id de carta + dorso. |
+| `RulesPreset`, `GameSettings` | App | ScriptableObjects de datos (`Assets/_Project/Data/`). |
+| `AppContext` + `SceneBootstrap` | App | Servicios compartidos (ajustes, preferencias, localización) inicializados desde cualquier escena; sin estado de partida. |
+| `MainMenuController`, `BootLoader`, `GameMenuButton` | App | Navegación entre escenas. |
+
+**Escenas generadas por código**: `Escoba.Editor.Build.SceneBuilder` (menú `Escoba/Build/Rebuild All`) crea `Boot`, `MainMenu`, `Game` y `Prefabs/CardView.prefab`, y `DefaultAssetsBuilder` crea presets, `CardSkin_Kenney` y `GameSettings`. Los cambios de maquetación se hacen en el constructor (reproducible y revisable en git), no a mano en la escena.
+
 ## Localización (propia, JSON)
 - `Assets/_Project/Localization/<idioma>.json` (`TextAsset`), formato `{ "language", "entries": [{ "key", "value" }] }` leído con `JsonUtility`.
 - `LocalizationService` (Presentation, instanciado en el bootstrap e inyectado): `Get(key, params object[] args)`, `CurrentLanguage`, evento `LanguageChanged`; fallback a español y luego a `[clave]`.

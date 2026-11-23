@@ -1,7 +1,7 @@
 {
     "name": "Escoba.Tests.EditMode",
     "rootNamespace": "Escoba.Tests.EditMode",
-    "references": ["Escoba.Core", "Escoba.AI", "Escoba.Net", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    "references": ["Escoba.Core", "Escoba.AI", "Escoba.Net", "Escoba.Presentation", "Escoba.App", "Escoba.Editor", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

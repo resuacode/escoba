@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 060a23b219aaddb498ca6a4f6f8b1ba3, type: 3}
+  m_Name: CardSkin_Kenney
+  m_EditorClassIdentifier: Escoba.Presentation::Escoba.Presentation.CardSkin
+  _displayName: Kenney
+  _author: Kenney (www.kenney.nl)
+  _license: CC0 1.0
+  _pixelArt: 1
+  _back: {fileID: 21300000, guid: bc8496b8a3361d247b36d0be2b4fdeb7, type: 3}
+  _faces:
+  - {fileID: 21300000, guid: 5dc026982a8ff3843a004a4878427696, type: 3}
+  - {fileID: 21300000, guid: a1f9558bbb321f344bf7862582d79495, type: 3}
+  - {fileID: 21300000, guid: 596416a020e67b540af901cae0201fe4, type: 3}
+  - {fileID: 21300000, guid: e57a4a46387c3694e822a9bcedd9e9bf, type: 3}
+  - {fileID: 21300000, guid: fb9c8665bd585a949932f8deb475a0ae, type: 3}
+  - {fileID: 21300000, guid: d8af6a9b385e032429074d29802a3e5d, type: 3}
+  - {fileID: 21300000, guid: c42d491083dc71f409d8d4f11a565871, type: 3}
+  - {fileID: 21300000, guid: 82cfcbf2530bcfa458244473ffdb3202, type: 3}
+  - {fileID: 21300000, guid: 81f52112ab0226f418813d15b9f21b88, type: 3}
+  - {fileID: 21300000, guid: 4996279ac32ed1742a25d6929f8e047f, type: 3}
+  - {fileID: 21300000, guid: af4c055ec791c8d42984f8bab35c4dc3, type: 3}
+  - {fileID: 21300000, guid: cb70b179c7d36d24496a844c8824d320, type: 3}
+  - {fileID: 21300000, guid: dfc48a19004b0004295b1f050f89fa0d, type: 3}
+  - {fileID: 21300000, guid: 348908f6df265784cb8cc3802c730c91, type: 3}
+  - {fileID: 21300000, guid: 81b63fd33fddec045bacff88a67bc02b, type: 3}
+  - {fileID: 21300000, guid: 908b01e3cfcc59b4997b7d1fd1206b79, type: 3}
+  - {fileID: 21300000, guid: 17017daf10119e74aacce41b10faaed3, type: 3}
+  - {fileID: 21300000, guid: fc0237528c7fd3444be714ced6e6d47e, type: 3}
+  - {fileID: 21300000, guid: 67520a6a11b034c43a94ec38e2f36278, type: 3}
+  - {fileID: 21300000, guid: e66ea3305b7b0c24a9c0bef10c90e990, type: 3}
+  - {fileID: 21300000, guid: 8dbd9076aaa86474bad77823bc0d02bc, type: 3}
+  - {fileID: 21300000, guid: 082ea086b5d4314428601f3fe7031fc6, type: 3}
+  - {fileID: 21300000, guid: 1ee117a8ac3f4924a93c12d1a55729e5, type: 3}
+  - {fileID: 21300000, guid: 9e2812fd0cc295f46bf40b3c15bc45d1, type: 3}
+  - {fileID: 21300000, guid: df45b1ce5b025fa48b0030fad3608229, type: 3}
+  - {fileID: 21300000, guid: 1e172ddcd7649954d889027605f65ba8, type: 3}
+  - {fileID: 21300000, guid: 1126d4e9bea8c6548bbcd8d7d788a888, type: 3}
+  - {fileID: 21300000, guid: 39075dfb0632c9242b8209495f80b52a, type: 3}
+  - {fileID: 21300000, guid: e00ef44830bacdf43918986b544f7427, type: 3}
+  - {fileID: 21300000, guid: a41776d3dd3fc574a8dc1c2dc2e706f7, type: 3}
+  - {fileID: 21300000, guid: f0165ef8f91935542af432bd8da1dd77, type: 3}
+  - {fileID: 21300000, guid: 9b1562f32125cb04c98618a3ff82ab7c, type: 3}
+  - {fileID: 21300000, guid: f91e791b40cd23e42a5abd3fbf74b8ab, type: 3}
+  - {fileID: 21300000, guid: cf5aab2a5656f1446946fb3b4d9770e9, type: 3}
+  - {fileID: 21300000, guid: 0d3a44ea75040cc4d9eea029d0cddb61, type: 3}
+  - {fileID: 21300000, guid: 95c39ebdaa68f084dbb693ce65a788c4, type: 3}
+  - {fileID: 21300000, guid: 2775f0a95c98068408bf824faa3c6d24, type: 3}
+  - {fileID: 21300000, guid: 9fb9beaeed9c17c4fbee9a4c42d066e9, type: 3}
+  - {fileID: 21300000, guid: fc4a4b9acb9355c489ed1306db22f9fb, type: 3}
+  - {fileID: 21300000, guid: b9069a887a76e6a4083ceac69cd631f4, type: 3}

@@ -17,7 +17,7 @@ Juego de cartas **Escoba** con la baraja española (40 cartas), 2D con uGUI.
 
 ## 3. Idioma y convenciones
 - **Código en inglés** (tipos, métodos, variables, nombres de assets técnicos). **Comentarios, XML docs, documentación, commits y mensajes al usuario en español.**
-- Texto visible al jugador: nunca hardcodeado en código ni en escenas; usa claves del sistema de localización propio (`Assets/_Project/Localization/<idioma>.json` + componente `LocalizedText` / `LocalizationService.Get`). Español por defecto, inglés después. Al añadir una clave, añádela en todos los JSON de idioma.
+- Texto visible al jugador: nunca hardcodeado en código ni en escenas; usa claves del sistema de localización propio (`Assets/_Project/Localization/{es,gl,en}.json` + componente `LocalizedText` / `Localization.Get`). Al añadir una clave, añádela en **los tres** JSON. El **gallego debe ser normativo (RAG), no portugués**: sigue las decisiones y fuentes de [docs/LOCALIZATION.md](docs/LOCALIZATION.md) y consulta el DRAG ante cualquier término nuevo.
 - C#: `PascalCase` para tipos/métodos/propiedades, `_camelCase` para campos privados, `camelCase` locales/parámetros; `[SerializeField] private` en vez de campos públicos; un tipo público por fichero, fichero = nombre del tipo.
 - Namespaces = ensamblado: `Escoba.Core`, `Escoba.AI`, `Escoba.Net`, `Escoba.Presentation`, `Escoba.App`, `Escoba.Editor`, `Escoba.Tests.*`.
 - Sin `FindObjectOfType`/`Find`/`GameObject.Find` en runtime; inyecta referencias por inspector o desde el bootstrap.
@@ -44,6 +44,7 @@ Reglas:
 6. **Reglas configurables**: `RulesConfig` (POCO en Core) creado desde un `RulesPreset` (ScriptableObject en App). No hay números mágicos de reglas en el código.
 7. **Arte desacoplado**: las cartas se pintan a través de un `CardSkin` (ScriptableObject `(Suit, Rank) → Sprite` + dorso). Ningún script referencia sprites de cartas directamente. Ver [docs/CARD_ART_REPLACEMENT.md](docs/CARD_ART_REPLACEMENT.md).
 8. UI responsive: `CanvasScaler` *Scale With Screen Size*, anclas correctas, safe area en móvil; input vía `EventSystem` + `InputSystemUIInputModule` (ratón y táctil por igual).
+9. **Escenas y prefab de carta generados por código**: `Escoba/Build/Rebuild All` (`Scripts/Editor/Build/SceneBuilder.cs`, `DefaultAssetsBuilder.cs`). Para cambiar la maquetación, edita el constructor y vuelve a ejecutar el menú; no edites las escenas a mano (se sobrescriben).
 
 ## 5. Flujo de trabajo
 Para cualquier feature usa la skill **`unity-feature`**. Resumen:
@@ -60,6 +61,7 @@ Para cualquier feature usa la skill **`unity-feature`**. Resumen:
 - **No edites YAML de `.unity`/`.prefab`/`.asset` a mano** si el MCP está disponible. Los `.cs`, `.asmdef` y `.md` sí se editan con las herramientas de fichero normales.
 - Si el MCP no responde: pide al usuario que abra Unity y pulse *Start Server* en `Window → MCP for Unity`; mientras, usa el fallback por CLI para tests.
 - Antes de entrar en Play Mode guarda la escena; al terminar sal de Play Mode (los cambios en Play Mode se pierden).
+- Particularidades observadas: al entrar en Play Mode o tras `manage_camera screenshot` el editor puede quedar **en pausa** (`EditorApplication.isPaused`): reanúdalo con `execute_code` (`EditorApplication.isPaused = false`). Si la captura de `manage_camera` sale sin la UI, captura con `ScreenCapture.CaptureScreenshot("Screenshots/x.png")` desde `execute_code` y léela con Read. `execute_code` bloquea `AssetDatabase.DeleteAsset`: borra con `manage_asset delete`.
 
 ## 7. Tests
 - EditMode (`Escoba.Tests.EditMode`): reglas, puntuación, IA, determinismo, simulaciones masivas con semilla.

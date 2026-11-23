@@ -1,7 +1,7 @@
 {
     "name": "Escoba.Tests.PlayMode",
     "rootNamespace": "Escoba.Tests.PlayMode",
-    "references": ["Escoba.Core", "Escoba.AI", "Escoba.Net", "Escoba.Presentation", "Escoba.App", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    "references": ["Escoba.Core", "Escoba.AI", "Escoba.Net", "Escoba.Presentation", "Escoba.App", "UnityEngine.UI", "Unity.TextMeshPro", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
