@@ -1,0 +1,14 @@
+{
+    "name": "Escoba.Tests.PlayMode",
+    "rootNamespace": "Escoba.Tests.PlayMode",
+    "references": ["Escoba.Core", "Escoba.AI", "Escoba.Net", "Escoba.Presentation", "Escoba.App", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

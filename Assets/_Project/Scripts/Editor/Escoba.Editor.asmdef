@@ -1,0 +1,14 @@
+{
+    "name": "Escoba.Editor",
+    "rootNamespace": "Escoba.Editor",
+    "references": ["Escoba.Core", "Escoba.Presentation", "Escoba.App"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

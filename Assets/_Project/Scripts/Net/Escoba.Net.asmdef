@@ -1,0 +1,14 @@
+{
+    "name": "Escoba.Net",
+    "rootNamespace": "Escoba.Net",
+    "references": ["Escoba.Core"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

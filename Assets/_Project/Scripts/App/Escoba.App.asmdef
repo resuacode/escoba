@@ -1,0 +1,14 @@
+{
+    "name": "Escoba.App",
+    "rootNamespace": "Escoba.App",
+    "references": ["Escoba.Core", "Escoba.AI", "Escoba.Net", "Escoba.Presentation", "UnityEngine.UI", "Unity.TextMeshPro", "Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

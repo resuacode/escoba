@@ -1,0 +1,14 @@
+{
+    "name": "Escoba.Presentation",
+    "rootNamespace": "Escoba.Presentation",
+    "references": ["Escoba.Core", "UnityEngine.UI", "Unity.TextMeshPro", "Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

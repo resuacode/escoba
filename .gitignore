@@ -136,3 +136,9 @@ crashlytics-build.properties
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Claude Code (configuración local personal)
+.claude/settings.local.json
+
+# Resultados de tests en CLI
+/TestResults/
