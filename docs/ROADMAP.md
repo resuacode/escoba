@@ -1,6 +1,6 @@
 # Roadmap
 
-Estado: **M0 en curso** · Última actualización: 2026-11-23
+Estado: **M0 y M1 completados; siguiente M2** · Última actualización: 2026-11-23
 
 ## M0 — Setup del proyecto
 - [x] CLAUDE.md, skills de proyecto y `.mcp.json`
@@ -19,15 +19,16 @@ Estado: **M0 en curso** · Última actualización: 2026-11-23
 - [x] Commit inicial
 
 ## M1 — Core de reglas + tests
-- [ ] `Card`, `Suit`, `Rank`, `Deck`, `SeededRandom`
-- [ ] `RulesConfig` + presets
-- [ ] `GameState`, comandos, `GameEngine` (reparto, turno, capturas, escobas, fin de ronda)
-- [ ] `LegalMoves`, `RoundScorer` (todas las variantes)
-- [ ] `PlayerView` filtrada
-- [ ] Tests de todos los casos límite de `escoba-rules` §9 + determinismo + invariantes
-- [ ] Bot Fácil y simulación bot‑vs‑bot en EditMode
+- [x] `Card`, `Suit`, `Deck`, `IRandom` / `Pcg32Random`
+- [x] `RulesConfig` (los presets como ScriptableObject pasan a M2, junto a la UI de configuración)
+- [x] `GameState`, comandos, `GameEngine` (reparto, escoba de mano, turno, capturas, escobas, fin de ronda y partida)
+- [x] `LegalMoves`, `Setenta`, `RoundScorer` (todas las variantes y bonificaciones)
+- [x] `PlayerView` filtrada y eventos con marca de privacidad (`IsPrivateTo`)
+- [x] Tests de los casos límite de `escoba-rules` §9 + determinismo + invariantes (96 tests EditMode en verde, 2026-11-23)
+- [x] Bot Fácil (`EasyBot`) y simulación bot‑vs‑bot en EditMode
 
 ## M2 — Mesa 2D 1v1 PvE
+- [ ] `RulesPreset` (ScriptableObject) → `RulesConfig`: Clásica 21, Rápida 15, Larga 31
 - [ ] `CardSkin` + herramienta de editor + skin Kenney
 - [ ] Escena `Game`: mesa, manos, mazo, bazas, marcador (uGUI responsive)
 - [ ] Selección de carta y combinación (ratón/táctil), arrastre

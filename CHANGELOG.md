@@ -3,7 +3,13 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
-### Added
+### Added — M1: núcleo de reglas
+- `Escoba.Core`: `Card`, `Suit`, `Deck`, `Pcg32Random`, `RulesConfig`, `GameState`, `GameEngine`, `LegalMoves`, `Setenta`, `RoundScorer`, `PlayerView`, comandos (`PlayCardCommand`, `StartNextRoundCommand`) y eventos de partida.
+- Reglas implementadas: reparto 3+4, escoba en el reparto (15 o 30), captura a 15 con elección de combinación, captura obligatoria, escobas, última jugada, mesa al último que captura, puntuación (escobas, cartas, oros, siete de oros, setenta clásica, bonificaciones opcionales), fin de partida sin empate en cabeza, 2-4 jugadores y parejas.
+- `Escoba.AI`: `IBotStrategy` y `EasyBot`.
+- 96 tests EditMode: cartas, RNG, reglas, capturas, motor, puntuación/setenta, vista filtrada y simulaciones bot-vs-bot (determinismo e invariantes en 2, 3 y 4 jugadores).
+
+### Added — M0: setup
 - `CLAUDE.md` con directrices del proyecto (convenciones, arquitectura, flujo de trabajo, MCP, tests, git).
 - Skills de Claude Code: `escoba-rules`, `unity-feature`, `unity-test`, `unity-playtest`, `escoba-ai`, `net-ready-check`, `card-skin`, `gdd`, `update-docs`.
 - Paquete MCP for Unity (`com.coplaydev.unity-mcp` v10.0.0) y `.mcp.json` con el servidor `unityMCP`.

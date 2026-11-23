@@ -7,9 +7,10 @@ description: Guía para diseñar, implementar, ajustar y medir los bots de la Es
 
 ## Contrato
 - Ensamblado `Escoba.AI` (C# puro). Un bot implementa `IBotStrategy`:
-  `IGameCommand ChooseCommand(PlayerView view, RulesConfig rules, IRandom rng)`.
+  `PlayCardCommand ChooseCommand(PlayerView view, IRandom rng)` (las reglas van en `view.Rules`).
+- Implementado: `EasyBot`. Referencia para simular: `Tests/EditMode/Support/GameSimulator.cs`.
 - Recibe una **`PlayerView`** (lo que ese jugador ve: su mano, mesa, bazas visibles, cartas jugadas, recuento del mazo). **Nunca** el `GameState` completo: un bot no puede hacer trampas, y así el mismo código sirve en online.
-- Devuelve siempre un comando **válido** (usa el generador de jugadas legales del Core: `LegalMoves.For(view, rules)`).
+- Devuelve siempre un comando **válido** (usa el generador de jugadas legales del Core: `LegalMoves.For(view)` o `LegalMoves.FindCaptures`).
 - Determinista dado el `IRandom` con semilla. Nada de `System.Random` propio ni reloj.
 - `AIController : IPlayerController` envuelve la estrategia y añade un retardo "humano" configurable **en la capa de presentación**, no en el bot.
 

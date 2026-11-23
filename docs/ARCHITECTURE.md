@@ -18,20 +18,30 @@ flowchart TB
 - `Core`, `AI`, `Net` tienen `noEngineReferences: true`; `ArchitectureTests` lo verifica.
 - Carpeta: `Assets/_Project/Scripts/<Ensamblado>/`.
 
-## Modelo del Core (previsto en M1)
+## Modelo del Core (implementado en M1)
+Carpeta `Assets/_Project/Scripts/Core/`, namespace `Escoba.Core`.
+
 | Tipo | Responsabilidad |
 |---|---|
-| `Card` (struct) | `Suit`, `Rank`, `Value`, `Id` (0‑39) |
-| `Deck` | Creación de las 40 cartas y barajado con `IRandom` |
-| `IRandom` / `SeededRandom` | RNG determinista (p. ej. xorshift/PCG) serializable |
-| `RulesConfig` | Opciones de reglas (ver `escoba-rules` §8) |
-| `GameState` | Asientos, manos, mesa, mazo, bazas, escobas, turno, repartidor, último que capturó, puntuaciones, fase |
-| `IGameCommand` | `PlayCardCommand { seat, cardId, captureIds[] }` (+ `StartRound`, `ConfirmRoundSummary`…) |
-| `GameEngine` | `Validate(cmd)`, `Apply(cmd) → IReadOnlyList<GameEvent>` |
-| `LegalMoves` | Enumera jugadas/capturas legales (subconjuntos de mesa que suman 15) |
-| `RoundScorer` | Puntuación de ronda según `RulesConfig` |
-| `PlayerView` | Proyección del estado visible para un asiento |
-| `GameEvent` | `CardsDealt`, `CardPlayed`, `CardsCaptured`, `EscobaScored`, `TableSweptToLastCapturer`, `RoundScored`, `GameOver`… |
+| `Card` (struct) | `Id` (0‑39 = palo·10 + ordinal), `Suit`, `Rank` (1‑7, 10, 11, 12), `Value` (1‑10), `SetentaStrength` |
+| `Deck` | Las 40 cartas ordenadas y barajado Fisher‑Yates con `IRandom` |
+| `IRandom` / `Pcg32Random` | RNG determinista PCG32 con estado serializable (`State`, `Increment`, `FromState`) |
+| `RulesConfig` | Opciones de reglas (ver `escoba-rules` §8); `Validate()` comprueba que el mazo se reparte exacto |
+| `GameState` | Manos, mesa, mazo, bazas y escobas por bando, puntuaciones, fase, repartidor, turno, último que capturó; `ComputeHash()` (FNV‑1a) y `TotalCardCount()`. Solo el motor lo modifica (miembros `internal`) |
+| `IGameCommand` | `PlayCardCommand { Seat, CardId, CaptureIds }` (vacío = dejar carta) y `StartNextRoundCommand` |
+| `GameEngine` | `StartGame()`, `Validate(cmd) → CommandValidation`, `Apply(cmd) → IReadOnlyList<GameEvent>` (lanza `InvalidCommandException`), `GetView(seat)` |
+| `LegalMoves` | Capturas posibles de una carta y jugadas legales de un asiento (respeta la captura obligatoria) |
+| `Setenta` / `RoundScorer` | Setenta clásica y puntuación de ronda (funciones puras) |
+| `PlayerView` / `SideView` | Instantánea de lo visible para un asiento: mano propia, mesa, recuentos, bazas públicas, puntuaciones |
+| `GameEvent` | `RoundStarted`, `HandDealt` (privado), `TableDealt`, `DealerTableEscoba`, `CardPlayed`, `CardsCaptured` (con `IsEscoba`), `TurnChanged`, `TableAwardedToLastCapturer`, `RoundScored`, `GameOver`. `IsPrivateTo` indica si solo un asiento debe verlo |
+
+Decisiones:
+- Las **bazas son públicas** en la `PlayerView`: cada carta capturada estuvo boca arriba en la mesa. Lo oculto son las manos ajenas y el orden del mazo.
+- El tope del mazo es el final de la lista; se reparte de una en una empezando por el mano.
+- Los tests acceden a los miembros `internal` (`InternalsVisibleTo("Escoba.Tests.EditMode")`) para construir estados explícitos con `TestGame.Create` y la notación corta de cartas (`"7o"`, `"10b"`).
+
+## IA (implementado en M1: nivel Fácil)
+`Escoba.AI`: `IBotStrategy.ChooseCommand(PlayerView view, IRandom rng) → PlayCardCommand`; `EasyBot` juega una carta al azar y captura (obligatoriamente, o con un 60% si la regla está desactivada).
 
 ## Flujo de una jugada
 ```mermaid

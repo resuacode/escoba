@@ -32,7 +32,8 @@ Ubicación: `Assets/_Project/Tests/EditMode/<Área>/<Tipo>Tests.cs` (namespace `
 Nombre: `MethodUnderTest_Scenario_ExpectedResult`.
 
 Pautas:
-- **Estados explícitos**: construye mano/mesa/mazo con cartas concretas mediante un builder de test (`GameStateBuilder`) en vez de barajar.
+- **Estados explícitos**: usa `TestGame.Create(rules, hands, table, deck, dealer, lastCapturer, scores)` (en `Tests/EditMode/Support/`) con la notación corta de cartas: número + inicial del palo (`"7o"` = 7 de oros, `"10b"` = sota de bastos, `"11c"` caballo de copas, `"12e"` rey de espadas). Por defecto el asiento 0 es mano. Ayudas: `Cards("7o 5c")`, `Capture(seat, "7o", "5c 3e")`, `Drop(seat, "1c")`, `First<TEvent>(events)`.
+- **Partidas completas**: `GameSimulator.Play(rules, seed, onStep)` con bots Fácil; `onStep` permite comprobar invariantes tras cada comando.
 - **Una regla, un test**. Cubre la lista de casos límite de la skill `escoba-rules` §9.
 - **Determinismo**: test que juega una partida completa con semilla fija y bots, dos veces, y compara el hash/serialización del estado final.
 - **Simulación masiva** (IA/balance): N partidas con semillas 0..N‑1 en un `[Test]` con `[Category("Slow")]`; comprueba invariantes (40 cartas siempre, sin duplicados, puntuaciones coherentes) y no solo resultados.
