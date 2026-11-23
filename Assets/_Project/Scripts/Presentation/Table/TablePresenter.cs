@@ -9,35 +9,36 @@ using UnityEngine.EventSystems;
 namespace Escoba.Presentation
 {
     /// <summary>
-    /// Mesa de juego (1 contra 1 en M2): reproduce los <see cref="GameEvent"/> del motor como
-    /// animaciones y gestiona la interacción del jugador local en su turno.
-    /// Mantiene un modelo visual propio que se alimenta solo de eventos públicos y de la mano del
-    /// jugador local (nunca lee las cartas ajenas), y puede compararse con la <see cref="PlayerView"/>.
+    /// Mesa de juego para 2-4 asientos: reproduce los <see cref="GameEvent"/> del motor como
+    /// animaciones y gestiona la interacción del jugador que mira la pantalla ("viewer", siempre
+    /// abajo). El viewer puede cambiar (hot-seat) con <see cref="SetViewer"/>; su mano puede
+    /// ocultarse (<see cref="SetViewerHandRevealed"/>) mientras no es su turno.
+    /// El modelo visual solo se alimenta de eventos públicos y de la mano del viewer
+    /// (nunca lee manos ajenas) y se compara con la <see cref="PlayerView"/> tras cada jugada.
     /// </summary>
     public sealed class TablePresenter : MonoBehaviour
     {
-        private const int BottomPosition = 0;
-        private const int TopPosition = 1;
-
         [Header("Referencias")]
         [SerializeField] private CardView _cardPrefab;
         [SerializeField] private RectTransform _cardLayer;
-        [SerializeField] private RectTransform _myHandAnchor;
-        [SerializeField] private RectTransform _opponentHandAnchor;
+        [Tooltip("Anclas de mano por hueco: abajo, derecha, arriba, izquierda (ver SeatLayout).")]
+        [SerializeField] private RectTransform[] _handAnchors = new RectTransform[SeatLayout.SlotCount];
+        [Tooltip("Fichas de asiento por hueco: abajo, derecha, arriba, izquierda.")]
+        [SerializeField] private SeatPanelView[] _seatPanels = new SeatPanelView[SeatLayout.SlotCount];
         [SerializeField] private RectTransform _tableAnchor;
         [SerializeField] private RectTransform _tableDropZone;
         [SerializeField] private RectTransform _deckAnchor;
-        [SerializeField] private RectTransform[] _pileAnchors = new RectTransform[2];
         [SerializeField] private HudView _hud;
 
         [Header("Tamaños (unidades del Canvas de referencia 1920×1080)")]
         [SerializeField] private float _cardHeight = 180f;
-        [SerializeField] private float _opponentCardHeight = 120f;
+        [SerializeField] private float _opponentCardHeight = 110f;
         [SerializeField] private float _cardSpacing = 14f;
         [SerializeField] private float _opponentCardSpacing = -30f;
+        [SerializeField] private float _sideCardSpacing = -60f;
         [SerializeField] private float _rowSpacing = 16f;
         [SerializeField] private float _selectedLift = 36f;
-        [SerializeField] private int _maxTableCardsPerRow = 8;
+        [SerializeField] private int _maxTableCardsPerRow = 7;
 
         [Header("Tiempos (segundos, a velocidad 1)")]
         [SerializeField] private float _dealInterval = 0.08f;
@@ -46,63 +47,144 @@ namespace Escoba.Presentation
         [SerializeField] private float _bannerDuration = 1.0f;
 
         private readonly Dictionary<int, CardView> _faceViews = new Dictionary<int, CardView>();
-        private readonly List<CardView> _opponentBacks = new List<CardView>();
-        private readonly List<Card> _myHand = new List<Card>();
+        private readonly List<Card> _viewerHand = new List<Card>();
         private readonly List<Card> _table = new List<Card>();
-        private readonly int[] _pileCounts = new int[2];
-        private readonly int[] _escobas = new int[2];
+        private List<CardView>[] _backs = new List<CardView>[0];
+        private int[] _pileCounts = new int[0];
+        private int[] _escobas = new int[0];
 
         private CardSkin _skin;
         private RulesConfig _rules;
-        private int _mySeat;
+        private string[] _names = new string[0];
+        private int _viewer;
+        private bool _revealViewerHand = true;
         private int _deckCount;
+        private int _dealer = -1;
+        private int _turn = -1;
         private PlaySelection _selection;
         private Action<PlayCardCommand> _submit;
 
         /// <summary>Multiplicador de velocidad de las animaciones (1 = normal).</summary>
         public float Speed { get; set; } = 1f;
 
-        /// <summary>Indica si está esperando la jugada del jugador local.</summary>
+        /// <summary>Indica si está esperando la jugada del viewer.</summary>
         public bool IsWaitingForHuman => _submit != null;
+
+        /// <summary>Asiento que mira la pantalla.</summary>
+        public int ViewerSeat => _viewer;
+
+        /// <summary>Indica si la mano del viewer se muestra boca arriba.</summary>
+        public bool IsViewerHandRevealed => _revealViewerHand;
+
+        private int PlayerCount => _rules.PlayerCount;
 
         private float MoveTime => _moveDuration / Mathf.Max(0.01f, Speed);
 
         private float DealTime => _dealInterval / Mathf.Max(0.01f, Speed);
 
         /// <summary>Prepara la mesa para una partida.</summary>
-        public void Initialize(CardSkin skin, RulesConfig rules, int mySeat)
+        public void Initialize(CardSkin skin, RulesConfig rules, IReadOnlyList<string> seatNames, int viewerSeat, bool revealViewerHand)
         {
             _skin = skin != null ? skin : throw new ArgumentNullException(nameof(skin));
             _rules = rules ?? throw new ArgumentNullException(nameof(rules));
-            _mySeat = mySeat;
+            _names = seatNames.ToArray();
+            _viewer = viewerSeat;
+            _revealViewerHand = revealViewerHand;
+            _backs = Enumerable.Range(0, rules.PlayerCount).Select(_ => new List<CardView>()).ToArray();
+            _pileCounts = new int[rules.SideCount];
+            _escobas = new int[rules.SideCount];
+
             _hud.SetBackSprite(skin.Back);
             _hud.SetTarget(rules.TargetScore);
-            _hud.SetName(BottomPosition, Localization.Get("game.you"));
-            _hud.SetName(TopPosition, Localization.Get("game.opponent"));
+            foreach (SeatPanelView panel in _seatPanels)
+            {
+                panel.SetBackSprite(skin.Back);
+            }
+
             _hud.PlayButton.onClick.RemoveListener(OnPlayClicked);
             _hud.PlayButton.onClick.AddListener(OnPlayClicked);
             _hud.UndoButton.onClick.RemoveListener(OnUndoClicked);
             _hud.UndoButton.onClick.AddListener(OnUndoClicked);
             ClearTable();
-            UpdateScores(new int[2]);
         }
 
         /// <summary>Nombre visible de un asiento.</summary>
-        public string SeatName(int seat) => Localization.Get(seat == _mySeat ? "game.you" : "game.opponent");
+        public string SeatName(int seat) => seat >= 0 && seat < _names.Length ? _names[seat] : string.Empty;
 
-        /// <summary>Actualiza el marcador (puntuación acumulada por bando).</summary>
-        public void UpdateScores(IReadOnlyList<int> scoresBySide)
+        /// <summary>Actualiza el marcador (puntuación acumulada y nombre por bando).</summary>
+        public void UpdateScores(IReadOnlyList<string> sideNames, IReadOnlyList<int> scoresBySide)
         {
-            for (int side = 0; side < scoresBySide.Count && side < 2; side++)
-            {
-                _hud.SetScore(PositionOfSide(side), scoresBySide[side]);
-            }
+            _hud.SetScores(sideNames, scoresBySide);
         }
 
-        /// <summary>Muestra el turno de la IA "pensando".</summary>
+        /// <summary>Muestra que la IA está "pensando".</summary>
         public void ShowThinking(int seat)
         {
             _hud.SetTurn(Localization.Get("game.thinking", SeatName(seat)));
+        }
+
+        /// <summary>
+        /// Cambia el jugador que mira la pantalla y recoloca toda la mesa desde su punto de vista
+        /// (sin animación), con su mano boca arriba o boca abajo.
+        /// </summary>
+        public void SetViewer(PlayerView view, bool revealHand)
+        {
+            if (_selection != null)
+            {
+                EndHumanTurn();
+            }
+
+            HideAllCards();
+            _viewer = view.Seat;
+            _revealViewerHand = revealHand;
+            _dealer = view.Dealer;
+            _turn = view.CurrentSeat;
+
+            foreach (Card card in view.Hand)
+            {
+                ShowFace(card, LayerPosition(_deckAnchor), revealHand);
+                _viewerHand.Add(card);
+            }
+
+            for (int seat = 0; seat < PlayerCount; seat++)
+            {
+                if (seat == _viewer)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < view.HandCounts[seat]; i++)
+                {
+                    _backs[seat].Add(CreateBack(LayerPosition(_deckAnchor)));
+                }
+            }
+
+            foreach (Card card in view.Table)
+            {
+                ShowFace(card, LayerPosition(_tableAnchor), true);
+                _table.Add(card);
+            }
+
+            _deckCount = view.DeckCount;
+            for (int side = 0; side < _pileCounts.Length; side++)
+            {
+                _pileCounts[side] = view.Sides[side].Captured.Count;
+                _escobas[side] = view.Sides[side].Escobas;
+            }
+
+            _hud.SetDeckCount(_deckCount);
+            RefreshSeatPanels();
+            LayoutAll(false);
+        }
+
+        /// <summary>Muestra u oculta (boca abajo) la mano del viewer.</summary>
+        public void SetViewerHandRevealed(bool reveal)
+        {
+            _revealViewerHand = reveal;
+            foreach (Card card in _viewerHand)
+            {
+                _faceViews[card.Id].SetFaceUp(reveal);
+            }
         }
 
         /// <summary>Reproduce un evento del motor (corrutina).</summary>
@@ -112,8 +194,9 @@ namespace Escoba.Presentation
             {
                 case RoundStartedEvent e:
                     ClearTable();
+                    _dealer = e.Dealer;
                     _hud.SetRound(e.RoundNumber);
-                    _hud.SetDealer(PositionOfSeat(e.Dealer));
+                    RefreshSeatPanels();
                     break;
                 case HandDealtEvent e:
                     yield return DealHand(e);
@@ -131,21 +214,40 @@ namespace Escoba.Presentation
                     yield return Capture(e);
                     break;
                 case TurnChangedEvent e:
-                    _hud.SetTurn(e.Seat == _mySeat ? Localization.Get("game.your_turn") : Localization.Get("game.turn_of", SeatName(e.Seat)));
+                    _turn = e.Seat;
+                    _hud.SetTurn(e.Seat == _viewer && _revealViewerHand
+                        ? Localization.Get("game.your_turn")
+                        : Localization.Get("game.turn_of", SeatName(e.Seat)));
+                    RefreshSeatPanels();
                     break;
                 case TableAwardedToLastCapturerEvent e:
                     yield return SweepToPile(e.Seat, e.Cards.ToList(), 0, Localization.Get("game.table_to_last", SeatName(e.Seat)));
                     break;
+                case RoundScoredEvent _:
+                    _turn = -1;
+                    RefreshSeatPanels();
+                    break;
             }
         }
 
-        /// <summary>Empieza el turno del jugador local: habilita la selección y los botones.</summary>
+        /// <summary>Empieza el turno del viewer: habilita la selección y los botones.</summary>
         public void BeginHumanTurn(PlayerView view, Action<PlayCardCommand> submit)
         {
+            if (view.Seat != _viewer)
+            {
+                throw new InvalidOperationException($"La mesa muestra el asiento {_viewer}, no el {view.Seat}: llama antes a SetViewer.");
+            }
+
+            if (!_revealViewerHand)
+            {
+                SetViewerHandRevealed(true);
+            }
+
+            _hud.SetTurn(Localization.Get("game.your_turn"));
             _submit = submit ?? throw new ArgumentNullException(nameof(submit));
             _selection = new PlaySelection(view.Hand, view.Table, view.Rules);
             _selection.Changed += RefreshSelection;
-            foreach (Card card in _myHand)
+            foreach (Card card in _viewerHand)
             {
                 _faceViews[card.Id].DragEnabled = true;
             }
@@ -153,7 +255,7 @@ namespace Escoba.Presentation
             RefreshSelection();
         }
 
-        /// <summary>Termina el turno del jugador local (sin jugar).</summary>
+        /// <summary>Termina el turno del viewer (sin jugar).</summary>
         public void EndHumanTurn()
         {
             if (_selection != null)
@@ -173,7 +275,22 @@ namespace Escoba.Presentation
             _hud.SetHint(null);
             _hud.SetSum(null);
             _hud.SetPlayControls(false, false, false);
-            LayoutMyHand(true);
+            LayoutViewerHand(true);
+        }
+
+        /// <summary>
+        /// Juega por el viewer sin pasar por la interacción (pruebas automáticas). Devuelve false
+        /// si no se esperaba jugada.
+        /// </summary>
+        public bool SubmitAutomatically(PlayCardCommand command)
+        {
+            if (_submit == null)
+            {
+                return false;
+            }
+
+            Submit(command);
+            return true;
         }
 
         /// <summary>
@@ -182,7 +299,12 @@ namespace Escoba.Presentation
         /// </summary>
         public string FindInconsistency(PlayerView view)
         {
-            if (!new HashSet<Card>(view.Hand).SetEquals(_myHand))
+            if (view.Seat != _viewer)
+            {
+                return $"La vista es del asiento {view.Seat} pero la mesa muestra el {_viewer}.";
+            }
+
+            if (!new HashSet<Card>(view.Hand).SetEquals(_viewerHand))
             {
                 return "La mano mostrada no coincide con la del motor.";
             }
@@ -192,10 +314,12 @@ namespace Escoba.Presentation
                 return "La mesa mostrada no coincide con la del motor.";
             }
 
-            int opponentSeat = (_mySeat + 1) % view.PlayerCount;
-            if (view.HandCounts[opponentSeat] != _opponentBacks.Count)
+            for (int seat = 0; seat < PlayerCount; seat++)
             {
-                return $"El rival tiene {view.HandCounts[opponentSeat]} cartas y se muestran {_opponentBacks.Count}.";
+                if (seat != _viewer && view.HandCounts[seat] != _backs[seat].Count)
+                {
+                    return $"El asiento {seat} tiene {view.HandCounts[seat]} cartas y se muestran {_backs[seat].Count}.";
+                }
             }
 
             if (view.DeckCount != _deckCount)
@@ -203,20 +327,20 @@ namespace Escoba.Presentation
                 return $"El mazo tiene {view.DeckCount} cartas y se muestran {_deckCount}.";
             }
 
-            for (int side = 0; side < view.Sides.Count && side < 2; side++)
+            for (int side = 0; side < view.Sides.Count; side++)
             {
-                if (view.Sides[side].Captured.Count != _pileCounts[PositionOfSide(side)])
+                if (view.Sides[side].Captured.Count != _pileCounts[side] || view.Sides[side].Escobas != _escobas[side])
                 {
-                    return $"La baza del bando {side} no coincide.";
+                    return $"La baza o las escobas del bando {side} no coinciden.";
                 }
             }
 
             return null;
         }
 
-        private int PositionOfSeat(int seat) => PositionOfSide(_rules.SideOfSeat(seat));
+        // ---- Modelo y colocación ----
 
-        private int PositionOfSide(int side) => side == _rules.SideOfSeat(_mySeat) ? BottomPosition : TopPosition;
+        private int SlotOf(int seat) => SeatLayout.SlotOf(seat, _viewer, PlayerCount);
 
         private Vector2 LayerPosition(RectTransform anchor)
         {
@@ -225,6 +349,20 @@ namespace Escoba.Presentation
         }
 
         private void ClearTable()
+        {
+            HideAllCards();
+            _deckCount = Card.DeckSize;
+            for (int side = 0; side < _pileCounts.Length; side++)
+            {
+                _pileCounts[side] = 0;
+                _escobas[side] = 0;
+            }
+
+            _hud.SetDeckCount(_deckCount);
+            RefreshSeatPanels();
+        }
+
+        private void HideAllCards()
         {
             if (_selection != null)
             {
@@ -236,27 +374,51 @@ namespace Escoba.Presentation
                 view.gameObject.SetActive(false);
             }
 
-            foreach (CardView back in _opponentBacks)
+            foreach (List<CardView> backs in _backs)
             {
-                Destroy(back.gameObject);
+                foreach (CardView back in backs)
+                {
+                    Destroy(back.gameObject);
+                }
+
+                backs.Clear();
             }
 
-            _opponentBacks.Clear();
-            _myHand.Clear();
+            _viewerHand.Clear();
             _table.Clear();
-            _deckCount = Core.Card.DeckSize;
-            for (int i = 0; i < 2; i++)
-            {
-                _pileCounts[i] = 0;
-                _escobas[i] = 0;
-                _hud.SetPileCount(i, 0);
-                _hud.SetEscobas(i, 0);
-            }
-
-            _hud.SetDeckCount(_deckCount);
         }
 
-        private CardView ShowFace(Card card, Vector2 position)
+        private void RefreshSeatPanels()
+        {
+            if (_rules == null)
+            {
+                return;
+            }
+
+            var used = new bool[SeatLayout.SlotCount];
+            for (int seat = 0; seat < PlayerCount; seat++)
+            {
+                int slot = SlotOf(seat);
+                used[slot] = true;
+                int side = _rules.SideOfSeat(seat);
+                SeatPanelView panel = _seatPanels[slot];
+                panel.gameObject.SetActive(true);
+                panel.SetName(SeatName(seat));
+                panel.SetPile(_pileCounts[side], _escobas[side]);
+                panel.SetDealer(seat == _dealer);
+                panel.SetActiveTurn(seat == _turn);
+            }
+
+            for (int slot = 0; slot < used.Length; slot++)
+            {
+                if (!used[slot])
+                {
+                    _seatPanels[slot].gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private CardView ShowFace(Card card, Vector2 position, bool faceUp)
         {
             if (!_faceViews.TryGetValue(card.Id, out CardView view))
             {
@@ -269,16 +431,16 @@ namespace Escoba.Presentation
             }
 
             view.gameObject.SetActive(true);
-            view.Bind(_skin, card, true, _cardHeight);
+            view.Bind(_skin, card, faceUp, _cardHeight);
             view.transform.SetAsLastSibling();
             view.SnapTo(position);
             return view;
         }
 
-        private CardView CreateOpponentBack(Vector2 position)
+        private CardView CreateBack(Vector2 position)
         {
             CardView back = Instantiate(_cardPrefab, _cardLayer);
-            back.name = "Opponent card";
+            back.name = "Hidden card";
             back.Bind(_skin, null, false, _opponentCardHeight);
             back.SnapTo(position);
             return back;
@@ -290,27 +452,24 @@ namespace Escoba.Presentation
             _deckCount -= e.Cards.Count;
             _hud.SetDeckCount(_deckCount);
 
-            if (e.Seat == _mySeat)
+            if (e.Seat == _viewer)
             {
                 foreach (Card card in e.Cards)
                 {
-                    ShowFace(card, deck);
-                    _myHand.Add(card);
+                    ShowFace(card, deck, _revealViewerHand);
+                    _viewerHand.Add(card);
                 }
-
-                LayoutMyHand(true, DealTime);
             }
             else
             {
-                // Las cartas del rival no se leen: solo cuántas son.
+                // Las cartas de otros asientos no se leen: solo cuántas son.
                 for (int i = 0; i < e.Cards.Count; i++)
                 {
-                    _opponentBacks.Add(CreateOpponentBack(deck));
+                    _backs[e.Seat].Add(CreateBack(deck));
                 }
-
-                LayoutOpponentHand(true, DealTime);
             }
 
+            LayoutSeat(e.Seat, true, DealTime);
             yield return Wait(MoveTime + (DealTime * e.Cards.Count));
         }
 
@@ -321,7 +480,7 @@ namespace Escoba.Presentation
             _hud.SetDeckCount(_deckCount);
             foreach (Card card in cards)
             {
-                ShowFace(card, deck);
+                ShowFace(card, deck, true);
                 _table.Add(card);
             }
 
@@ -331,20 +490,23 @@ namespace Escoba.Presentation
 
         private CardView TakeFromHand(int seat, Card card)
         {
-            if (seat == _mySeat)
+            if (seat == _viewer)
             {
-                _myHand.Remove(card);
+                _viewerHand.Remove(card);
                 CardView own = _faceViews[card.Id];
                 own.DragEnabled = false;
+                own.SetFaceUp(true);
+                own.SetHeight(_cardHeight);
                 own.transform.SetAsLastSibling();
                 return own;
             }
 
-            CardView back = _opponentBacks[_opponentBacks.Count - 1];
-            _opponentBacks.RemoveAt(_opponentBacks.Count - 1);
+            List<CardView> backs = _backs[seat];
+            CardView back = backs[backs.Count - 1];
+            backs.RemoveAt(backs.Count - 1);
             Vector2 from = back.Rect.anchoredPosition;
             Destroy(back.gameObject);
-            return ShowFace(card, from);
+            return ShowFace(card, from, true);
         }
 
         private IEnumerator PlayToTable(int seat, Card card)
@@ -352,14 +514,14 @@ namespace Escoba.Presentation
             TakeFromHand(seat, card);
             _table.Add(card);
             LayoutTable(true);
-            LayoutHands();
+            LayoutSeat(seat, true);
             yield return Wait(MoveTime);
         }
 
         private IEnumerator Capture(CardsCapturedEvent e)
         {
             CardView played = TakeFromHand(e.Seat, e.PlayedCard);
-            LayoutHands();
+            LayoutSeat(e.Seat, true);
 
             // La carta jugada se posa sobre las capturadas, que se resaltan un instante.
             Vector2 target = e.Captured.Select(c => _faceViews[c.Id].Rect.anchoredPosition).Aggregate(Vector2.zero, (a, b) => a + b) / e.Captured.Count;
@@ -378,8 +540,7 @@ namespace Escoba.Presentation
 
         private IEnumerator SweepToPile(int seat, List<Card> cards, int escobas, string banner)
         {
-            int position = PositionOfSeat(seat);
-            Vector2 pile = LayerPosition(_pileAnchors[position]);
+            Vector2 pile = LayerPosition(_seatPanels[SlotOf(seat)].PileAnchor);
             foreach (Card card in cards)
             {
                 _table.Remove(card);
@@ -394,10 +555,10 @@ namespace Escoba.Presentation
                 _faceViews[card.Id].gameObject.SetActive(false);
             }
 
-            _pileCounts[position] += cards.Count;
-            _escobas[position] += escobas;
-            _hud.SetPileCount(position, _pileCounts[position]);
-            _hud.SetEscobas(position, _escobas[position]);
+            int side = _rules.SideOfSeat(seat);
+            _pileCounts[side] += cards.Count;
+            _escobas[side] += escobas;
+            RefreshSeatPanels();
             LayoutTable(true);
 
             if (!string.IsNullOrEmpty(banner))
@@ -406,35 +567,52 @@ namespace Escoba.Presentation
             }
         }
 
-        private void LayoutHands()
+        private void LayoutAll(bool animate)
         {
-            LayoutMyHand(true);
-            LayoutOpponentHand(true);
+            for (int seat = 0; seat < PlayerCount; seat++)
+            {
+                LayoutSeat(seat, animate);
+            }
+
+            LayoutTable(animate);
         }
 
-        private void LayoutMyHand(bool animate, float stagger = 0f)
+        private void LayoutSeat(int seat, bool animate, float stagger = 0f)
+        {
+            if (seat == _viewer)
+            {
+                LayoutViewerHand(animate, stagger);
+                return;
+            }
+
+            int slot = SlotOf(seat);
+            bool vertical = SeatLayout.IsVertical(slot);
+            float step = vertical
+                ? _opponentCardHeight + _sideCardSpacing
+                : CardWidth(_opponentCardHeight) + _opponentCardSpacing;
+            List<CardView> backs = _backs[seat];
+            Vector2[] slots = Row(backs.Count, LayerPosition(_handAnchors[slot]), step, vertical);
+            for (int i = 0; i < backs.Count; i++)
+            {
+                Place(backs[i], slots[i], animate, stagger * i);
+            }
+        }
+
+        private void LayoutViewerHand(bool animate, float stagger = 0f)
         {
             float width = CardWidth(_cardHeight);
-            Vector2[] slots = Row(_myHand.Count, LayerPosition(_myHandAnchor), width + _cardSpacing);
-            for (int i = 0; i < _myHand.Count; i++)
+            Vector2[] slots = Row(_viewerHand.Count, LayerPosition(_handAnchors[SeatLayout.Bottom]), width + _cardSpacing, false);
+            for (int i = 0; i < _viewerHand.Count; i++)
             {
                 Vector2 slot = slots[i];
-                if (_selection != null && _selection.SelectedCard == _myHand[i])
+                if (_selection != null && _selection.SelectedCard == _viewerHand[i])
                 {
                     slot.y += _selectedLift;
                 }
 
-                Place(_faceViews[_myHand[i].Id], slot, animate, stagger * i);
-            }
-        }
-
-        private void LayoutOpponentHand(bool animate, float stagger = 0f)
-        {
-            float width = CardWidth(_opponentCardHeight);
-            Vector2[] slots = Row(_opponentBacks.Count, LayerPosition(_opponentHandAnchor), width + _opponentCardSpacing);
-            for (int i = 0; i < _opponentBacks.Count; i++)
-            {
-                Place(_opponentBacks[i], slots[i], animate, stagger * i);
+                CardView view = _faceViews[_viewerHand[i].Id];
+                view.SetHeight(_cardHeight);
+                Place(view, slot, animate, stagger * i);
             }
         }
 
@@ -455,8 +633,8 @@ namespace Escoba.Presentation
             for (int row = 0; row < rows; row++)
             {
                 int inRow = Mathf.Min(perRow, count - index);
-                float y = center.y + (((rows - 1) / 2f) - row) * (height + _rowSpacing);
-                Vector2[] slots = Row(inRow, new Vector2(center.x, y), width + _cardSpacing);
+                float y = center.y + ((((rows - 1) / 2f) - row) * (height + _rowSpacing));
+                Vector2[] slots = Row(inRow, new Vector2(center.x, y), width + _cardSpacing, false);
                 for (int i = 0; i < inRow; i++, index++)
                 {
                     CardView view = _faceViews[_table[index].Id];
@@ -484,13 +662,14 @@ namespace Escoba.Presentation
             return height * native.x / native.y;
         }
 
-        private static Vector2[] Row(int count, Vector2 center, float step)
+        private static Vector2[] Row(int count, Vector2 center, float step, bool vertical)
         {
             var slots = new Vector2[count];
-            float start = center.x - (step * (count - 1) / 2f);
+            float start = -(step * (count - 1) / 2f);
             for (int i = 0; i < count; i++)
             {
-                slots[i] = new Vector2(start + (step * i), center.y);
+                float offset = start + (step * i);
+                slots[i] = vertical ? new Vector2(center.x, center.y - offset) : new Vector2(center.x + offset, center.y);
             }
 
             return slots;
@@ -504,7 +683,7 @@ namespace Escoba.Presentation
             }
         }
 
-        // ---- Interacción del jugador local ----
+        // ---- Interacción del viewer ----
 
         private void RefreshSelection()
         {
@@ -515,7 +694,7 @@ namespace Escoba.Presentation
 
             bool cardSelected = _selection.SelectedCard.HasValue;
             bool hasCaptures = _selection.Captures.Count > 0;
-            foreach (Card card in _myHand)
+            foreach (Card card in _viewerHand)
             {
                 _faceViews[card.Id].SetHighlight(_selection.SelectedCard == card ? CardHighlight.Selected : CardHighlight.None);
             }
@@ -538,7 +717,7 @@ namespace Escoba.Presentation
             _hud.SetHint(HintText(_selection.Hint));
             _hud.SetSum(cardSelected && hasCaptures ? Localization.Get("game.sum", _selection.Sum, _selection.CaptureSum) : null);
             _hud.SetPlayControls(true, _selection.CanConfirm, cardSelected);
-            LayoutMyHand(true);
+            LayoutViewerHand(true);
         }
 
         private static string HintText(SelectionHint hint)
@@ -561,11 +740,11 @@ namespace Escoba.Presentation
             }
 
             Card card = view.Card.Value;
-            if (_myHand.Contains(card))
+            if (_viewerHand.Contains(card))
             {
                 if (eventData.clickCount >= 2)
                 {
-                    PlayCardCommand quick = _selection.TryQuickPlay(_mySeat, card);
+                    PlayCardCommand quick = _selection.TryQuickPlay(_viewer, card);
                     if (quick != null)
                     {
                         Submit(quick);
@@ -605,7 +784,7 @@ namespace Escoba.Presentation
                              && RectTransformUtility.RectangleContainsScreenPoint(_tableDropZone, eventData.position, eventData.pressEventCamera);
             if (overTable)
             {
-                PlayCardCommand quick = _selection.TryQuickPlay(_mySeat, view.Card.Value);
+                PlayCardCommand quick = _selection.TryQuickPlay(_viewer, view.Card.Value);
                 if (quick != null)
                 {
                     Submit(quick);
@@ -613,14 +792,14 @@ namespace Escoba.Presentation
                 }
             }
 
-            LayoutMyHand(true);
+            LayoutViewerHand(true);
         }
 
         private void OnPlayClicked()
         {
             if (_selection != null && _selection.CanConfirm)
             {
-                Submit(_selection.BuildCommand(_mySeat));
+                Submit(_selection.BuildCommand(_viewer));
             }
         }
 

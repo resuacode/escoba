@@ -1,6 +1,6 @@
 # Roadmap
 
-Estado: **M0, M1 y M2 completados; siguiente M3** · Última actualización: 2026-11-23
+Estado: **M0–M3 completados; siguiente M4** · Última actualización: 2026-11-23
 
 ## M0 — Setup del proyecto
 - [x] CLAUDE.md, skills de proyecto y `.mcp.json`
@@ -41,9 +41,13 @@ Estado: **M0, M1 y M2 completados; siguiente M3** · Última actualización: 202
 - [ ] Pendiente de M5: arte de mesa definitivo, iconos y revisión en resoluciones móviles reales
 
 ## M3 — Hot‑seat, 3‑4 jugadores y parejas
-- [ ] `HumanLocalController` múltiple + pantalla de pase
-- [ ] Layouts de 3 y 4 jugadores, marcador por parejas
-- [ ] Mezcla humanos/bots por asiento
+- [x] Varios `HumanLocalController` + pantalla de pase opaca con la última jugada; mano oculta fuera de tu turno
+- [x] Mesa para 2, 3 y 4 jugadores (`SeatLayout`: el que mira siempre abajo, el siguiente a su derecha) con fichas de asiento (`SeatPanelView`)
+- [x] Parejas: baza compartida, marcador "Pareja n (miembros)", resumen y fin de partida por bandos
+- [x] Mezcla humanos/IA por asiento en "Nueva partida" (número de jugadores, individual/por parejas, Humano/IA por asiento)
+- [x] Textos nuevos en es/gl/en (gallego revisado con el DRAG)
+- [x] 141 tests EditMode + 6 PlayMode (partidas completas 2/3/4/parejas y hot-seat) en verde (2026-11-23)
+- [ ] Pendiente: nombres personalizados de jugadores (campo de texto) y recordar la última configuración de asientos
 
 ## M4 — IA Media y Difícil
 - [ ] Heurística Media con pesos configurables

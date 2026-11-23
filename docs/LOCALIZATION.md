@@ -39,6 +39,11 @@ Norma de referencia: **Normas ortográficas e morfolóxicas do idioma galego (RA
 | máis / mais | **máis** (adverbio) con tilde | Normas §2.7.1 |
 | Signos ¡ ¿ | **no se usan** en la interfaz (son opcionales según las Normas, §7) | Normas 2012, §7 |
 | "está a pensar" | perífrasis *estar a + infinitivo* (también válida "está pensando") | uso normativo habitual |
+| Pareja (equipo) | **parella / parellas** ("Parella 1", "Por parellas", "Gañou a túa parella!") | DRAG *parella* acep. 1-2 — https://academia.gal/dicionario/-/termo/busca/parella |
+| Mostrar | **amosar** (preferente; *mostrar* también es correcto): "amosar a miña man" | DRAG *amosar*, *mostrar* |
+| Nadie | **ninguén** | DRAG *ninguén* |
+| Pasa el dispositivo | **"Pásalle o dispositivo a {0}"** (duplicación del CI con *lle*, natural en gallego) | criterio gramatical (revisión M3) |
+| Pretéritos | **xogou, levou, deixou, fixo, gañou** (sin tiempos compuestos: "Ha ganado" → "Gañou") | formas normativas |
 
 `LocalizationTests.Galician_FollowsRagNormDecisions` vigila estas decisiones y la ausencia de grafías portuguesas (ç, ã, õ, lh...).
 

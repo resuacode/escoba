@@ -74,7 +74,11 @@ sequenceDiagram
 | `IPlayerController` | Core | `RequestCommand(PlayerView, Action<PlayCardCommand>)`; implementado por `HumanLocalController` (Presentation) y `AIController` (AI). El retardo de "pensar" lo añade `GameController`. |
 | `TablePresenter` | Presentation | Reproduce eventos con animaciones (corrutinas) sobre un modelo visual propio alimentado solo con eventos públicos y la mano local; `FindInconsistency(view)` lo compara con el motor tras cada jugada (error en consola si difiere). Gestiona la interacción humana. |
 | `PlaySelection` | Presentation | Lógica pura de la selección (candidatas, suma, confirmación, jugada rápida); testeada en EditMode. |
-| `CardView`, `HudView`, `RoundSummaryPanel`, `GameOverPanel`, `SafeArea` | Presentation | Vistas uGUI. |
+| `CardView`, `HudView`, `SeatPanelView`, `RoundSummaryPanel`, `GameOverPanel`, `PassScreenPanel`, `SafeArea` | Presentation | Vistas uGUI. |
+| `SeatLayout` | Presentation | Hueco de pantalla de cada asiento respecto al que mira (abajo/derecha/arriba/izquierda). |
+| `MatchConfig`, `SeatType`, `PlayerNaming` | App | Asientos humano/IA, parejas y nombres visibles. |
+
+**Hot-seat (M3)**: con ≥2 humanos, `GameController` muestra `PassScreenPanel` antes de cada turno humano, llama a `TablePresenter.SetViewer(view, reveal: true)` (recoloca la mesa desde ese jugador a partir de su `PlayerView`) y, tras su jugada, `SetViewerHandRevealed(false)`. Los repartos al jugador que mira llegan boca abajo mientras no sea su turno. Con un solo humano, el punto de vista es fijo.
 | `CardSkin` | Presentation | Sprites por id de carta + dorso. |
 | `RulesPreset`, `GameSettings` | App | ScriptableObjects de datos (`Assets/_Project/Data/`). |
 | `AppContext` + `SceneBootstrap` | App | Servicios compartidos (ajustes, preferencias, localización) inicializados desde cualquier escena; sin estado de partida. |

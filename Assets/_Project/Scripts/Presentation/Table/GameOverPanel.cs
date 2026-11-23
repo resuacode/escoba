@@ -19,12 +19,11 @@ namespace Escoba.Presentation
         private Action _onMenu;
 
         /// <summary>Muestra el resultado. <paramref name="names"/> y <paramref name="totals"/> van en el mismo orden.</summary>
-        public void Show(bool localPlayerWon, string winnerName, IReadOnlyList<string> names, IReadOnlyList<int> totals,
-            Action onRematch, Action onMenu)
+        public void Show(string title, IReadOnlyList<string> names, IReadOnlyList<int> totals, Action onRematch, Action onMenu)
         {
             _onRematch = onRematch;
             _onMenu = onMenu;
-            _title.text = localPlayerWon ? Localization.Get("gameover.you_win") : Localization.Get("gameover.winner", winnerName);
+            _title.text = title;
 
             var text = new StringBuilder();
             for (int i = 0; i < names.Count; i++)
@@ -34,6 +33,7 @@ namespace Escoba.Presentation
 
             _scores.text = text.ToString();
             gameObject.SetActive(true);
+            transform.SetAsLastSibling();
         }
 
         /// <summary>Oculta el panel.</summary>

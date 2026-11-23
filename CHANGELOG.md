@@ -3,6 +3,20 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+### Added — M3: hot-seat, 3-4 jugadores y parejas
+- "Jugar en este dispositivo" activado. "Nueva partida" permite elegir 2, 3 o 4 jugadores, individual o por parejas (con 4) y Humano/IA en cada asiento (al menos un humano).
+- Pantalla de pase opaca antes de cada turno humano cuando hay varios humanos, con la última jugada ("X jugó el 5 de copas y se llevó 2 cartas"); la mano solo se ve durante el turno de su dueño.
+- La mesa se dibuja desde el jugador que mira (siempre abajo) y rota al cambiar de jugador; manos ajenas arriba o en columna a los lados; ficha por asiento con nombre, baza, escobas, "Reparte" y resalte de turno.
+- Parejas: marcador "Pareja 1 (Tú y IA 3)", resumen de ronda con hasta 4 columnas, "¡Ha ganado tu pareja!".
+- Nombres: "Tú"/"Rival" (1 contra 1), "IA n", "Jugador n", "Pareja n" en es/gl/en.
+- `SeatLayout`, `SeatPanelView`, `PassScreenPanel`, `PlayerNaming`, `SeatType`; `MatchConfig` con asientos y parejas.
+- Tests: `SeatLayoutTests`, `MatchSetupTests` (EditMode); partidas completas 2/3/4/parejas y `HotSeat_PassScreenHidesHandsAndSwitchesViewer` (PlayMode).
+
+### Changed
+- `HudView` pasa a mostrar un marcador de hasta 4 bandos; la información de cada jugador vive en `SeatPanelView`.
+- `TablePresenter` admite N asientos y cambiar de jugador que mira (`SetViewer`, `SetViewerHandRevealed`).
+- Menú movido arriba a la izquierda y marcador arriba a la derecha; mazo abajo a la izquierda.
+
 ### Added — M2: mesa 2D 1 contra 1 contra la IA
 - Escena `Game` jugable: reparto animado, mano propia, dorsos del rival, mesa, mazo, bazas, escobas, marcador, turno, aviso "¡Escoba!", resumen de ronda y fin de partida con revancha.
 - Interacción con ratón y táctil: seleccionar carta (las capturas posibles se resaltan y el resto se oscurece), marcar cartas de la mesa, suma "x/15", botones Jugar/Deshacer, doble toque y arrastre a la mesa para jugar directamente.

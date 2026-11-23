@@ -6,19 +6,16 @@ using UnityEngine.UI;
 namespace Escoba.Presentation
 {
     /// <summary>
-    /// Información de la mesa alrededor de las cartas: nombres, marcador, turno, mazo, bazas,
-    /// indicaciones, suma, botones de jugada y el aviso grande ("¡Escoba!"). Solo muestra datos.
-    /// Índice 0 = lado inferior (el jugador local), 1 = lado superior (rival).
+    /// Información general de la mesa: marcador (hasta 4 bandos), objetivo, ronda, turno, mazo,
+    /// indicaciones, suma, botones de jugada y aviso grande ("¡Escoba!"). Solo muestra datos.
+    /// La información de cada asiento (nombre, baza, escobas) está en <see cref="SeatPanelView"/>.
     /// </summary>
     public sealed class HudView : MonoBehaviour
     {
-        [Header("Jugadores (0 = abajo, 1 = arriba)")]
-        [SerializeField] private TMP_Text[] _names = new TMP_Text[2];
-        [SerializeField] private TMP_Text[] _scores = new TMP_Text[2];
-        [SerializeField] private TMP_Text[] _pileCounts = new TMP_Text[2];
-        [SerializeField] private TMP_Text[] _escobas = new TMP_Text[2];
-        [SerializeField] private Image[] _pileBacks = new Image[2];
-        [SerializeField] private GameObject[] _dealerBadges = new GameObject[2];
+        [Header("Marcador (una fila por bando)")]
+        [SerializeField] private GameObject[] _scoreRows = new GameObject[4];
+        [SerializeField] private TMP_Text[] _scoreNames = new TMP_Text[4];
+        [SerializeField] private TMP_Text[] _scoreValues = new TMP_Text[4];
 
         [Header("Mesa")]
         [SerializeField] private TMP_Text _target;
@@ -47,7 +44,7 @@ namespace Escoba.Presentation
         /// <summary>Botón de menú.</summary>
         public Button MenuButton => _menuButton;
 
-        /// <summary>Configura los dorsos de mazo y bazas.</summary>
+        /// <summary>Dorso del mazo.</summary>
         public void SetBackSprite(Sprite back)
         {
             if (_deckBack != null)
@@ -55,39 +52,32 @@ namespace Escoba.Presentation
                 _deckBack.sprite = back;
                 _deckBack.preserveAspect = true;
             }
+        }
 
-            foreach (Image pile in _pileBacks)
+        /// <summary>Muestra las filas del marcador (nombre y puntos por bando).</summary>
+        public void SetScores(System.Collections.Generic.IReadOnlyList<string> names, System.Collections.Generic.IReadOnlyList<int> scores)
+        {
+            for (int i = 0; i < _scoreRows.Length; i++)
             {
-                if (pile != null)
+                bool visible = i < names.Count;
+                if (_scoreRows[i] != null)
                 {
-                    pile.sprite = back;
-                    pile.preserveAspect = true;
+                    _scoreRows[i].SetActive(visible);
                 }
-            }
-        }
 
-        public void SetName(int position, string text) => SetText(_names, position, text);
-
-        public void SetScore(int position, int score) => SetText(_scores, position, score.ToString());
-
-        public void SetEscobas(int position, int escobas) => SetText(_escobas, position, Localization.Get("game.escobas", escobas));
-
-        public void SetPileCount(int position, int count)
-        {
-            SetText(_pileCounts, position, Localization.GetPlural("game.cards", count));
-            if (position < _pileBacks.Length && _pileBacks[position] != null)
-            {
-                _pileBacks[position].enabled = count > 0;
-            }
-        }
-
-        public void SetDealer(int position)
-        {
-            for (int i = 0; i < _dealerBadges.Length; i++)
-            {
-                if (_dealerBadges[i] != null)
+                if (!visible)
                 {
-                    _dealerBadges[i].SetActive(i == position);
+                    continue;
+                }
+
+                if (_scoreNames[i] != null)
+                {
+                    _scoreNames[i].text = names[i];
+                }
+
+                if (_scoreValues[i] != null)
+                {
+                    _scoreValues[i].text = i < scores.Count ? scores[i].ToString() : "0";
                 }
             }
         }
@@ -186,14 +176,6 @@ namespace Escoba.Presentation
             SetHint(null);
             SetSum(null);
             SetPlayControls(false, false, false);
-        }
-
-        private static void SetText(TMP_Text[] texts, int index, string value)
-        {
-            if (texts != null && index >= 0 && index < texts.Length && texts[index] != null)
-            {
-                texts[index].text = value;
-            }
         }
 
         private static void SetSingle(TMP_Text text, string value)

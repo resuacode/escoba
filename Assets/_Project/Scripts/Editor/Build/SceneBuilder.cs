@@ -10,6 +10,7 @@ using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static Escoba.Editor.Build.UiFactory;
+using Object = UnityEngine.Object;
 
 namespace Escoba.Editor.Build
 {
@@ -17,6 +18,7 @@ namespace Escoba.Editor.Build
     /// Construye las escenas Boot, MainMenu y Game y el prefab de carta de forma reproducible
     /// (menú <c>Escoba/Build/...</c>). Sobrescribe las escenas: los ajustes visuales que deban
     /// conservarse se hacen aquí, no a mano en la escena.
+    /// Coordenadas en unidades del Canvas de referencia 1920×1080, con origen en el centro.
     /// </summary>
     public static class SceneBuilder
     {
@@ -26,6 +28,12 @@ namespace Escoba.Editor.Build
         private static readonly Vector2 ReferenceResolution = new Vector2(1920f, 1080f);
         private static readonly Color FeltColor = new Color(0.05f, 0.27f, 0.15f, 1f);
         private static readonly Color TableAreaColor = new Color(0.08f, 0.35f, 0.2f, 1f);
+        private static readonly Color SeatPanelColor = new Color(0.04f, 0.12f, 0.08f, 1f);
+
+        // Huecos de asiento en el orden de SeatLayout: abajo, derecha, arriba, izquierda.
+        private static readonly Vector2[] HandPositions = { new Vector2(0f, -400f), new Vector2(720f, 20f), new Vector2(0f, 420f), new Vector2(-720f, 20f) };
+        private static readonly Vector2[] SeatPanelPositions = { new Vector2(-470f, -430f), new Vector2(820f, -230f), new Vector2(-470f, 430f), new Vector2(-820f, 230f) };
+        private static readonly string[] SlotNames = { "Bottom", "Right", "Top", "Left" };
 
         [MenuItem("Escoba/Build/Rebuild All (assets + scenes)")]
         public static void RebuildAll()
@@ -78,11 +86,11 @@ namespace Escoba.Editor.Build
             SetField(view, "_shade", shade);
 
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, CardPrefabPath);
-            UnityEngine.Object.DestroyImmediate(root);
+            Object.DestroyImmediate(root);
             return prefab.GetComponent<CardView>();
         }
 
-        // ---------------------------------------------------------------- Escenas
+        // ---------------------------------------------------------------- Boot
 
         private static void BuildBoot(GameSettings settings)
         {
@@ -94,10 +102,11 @@ namespace Escoba.Editor.Build
             Save(scene, SceneNames.Boot);
         }
 
+        // ---------------------------------------------------------------- Menú principal
+
         private static void BuildMainMenu(GameSettings settings)
         {
             Scene scene = NewScene();
-            // Crear una escena nueva descarga los assets no usados: recargar referencias por ruta.
             settings = AssetDatabase.LoadAssetAtPath<GameSettings>(DefaultAssetsBuilder.GameSettingsPath);
             RectTransform safe = CreateCommon(settings, true);
 
@@ -107,136 +116,177 @@ namespace Escoba.Editor.Build
 
             // Menú principal
             RectTransform main = CreateRect("MainPanel", safe);
-            Place(main, new Vector2(0.5f, 0.5f), new Vector2(0f, -90f), new Vector2(720f, 700f));
+            Place(main, Center, new Vector2(0f, -90f), new Vector2(720f, 700f));
             VerticalLayout(main, 22f);
 
             Button playAi = CreateButton(main, "PlayAiButton", "menu.play_ai", new Vector2(680f, 96f));
-            Button playLocal = ComingSoonButton(main, "PlayLocalButton", "menu.play_local");
+            Button playLocal = CreateButton(main, "PlayLocalButton", "menu.play_local", new Vector2(680f, 96f));
             Button playOnline = ComingSoonButton(main, "PlayOnlineButton", "menu.play_online");
             Button howTo = ComingSoonButton(main, "HowToPlayButton", "menu.how_to_play");
             Button language = CreateButton(main, "LanguageButton", null, new Vector2(680f, 96f));
             Button quit = CreateButton(main, "QuitButton", "menu.quit", new Vector2(680f, 96f));
 
-            // Nueva partida
-            RectTransform setup = CreateRect("SetupPanel", safe);
-            Place(setup, new Vector2(0.5f, 0.5f), new Vector2(0f, -110f), new Vector2(1300f, 700f));
-            Image setupBackground = setup.gameObject.AddComponent<Image>();
-            setupBackground.sprite = RoundedSprite;
-            setupBackground.type = UnityEngine.UI.Image.Type.Sliced;
-            setupBackground.color = PanelColor;
+            // Nueva partida (dos columnas)
+            Image setupBackground = CreateImage(safe, "SetupPanel", PanelColor, RoundedSprite, true);
+            RectTransform setup = setupBackground.rectTransform;
+            Place(setup, Center, new Vector2(0f, -10f), new Vector2(1640f, 960f));
 
-            TextMeshProUGUI setupTitle = CreateText(setup, "Title", "setup.title", 64f, TextAlignmentOptions.Center, Gold);
-            Place(setupTitle.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -70f), new Vector2(1000f, 90f));
+            Label(setup, "Title", "setup.title", 60f, new Vector2(0f, -60f), new Vector2(1000f, 80f), Gold);
 
-            TextMeshProUGUI rulesLabel = CreateText(setup, "RulesLabel", "setup.rules", 40f, TextAlignmentOptions.Center, TextLight);
-            Place(rulesLabel.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -165f), new Vector2(1000f, 60f));
-            Button[] presets = ButtonRow(setup, "Preset", new[] { "setup.preset.classic21", "setup.preset.quick15", "setup.preset.long31" }, -250f);
+            // Columna izquierda: jugadores, modo y asientos
+            const float leftX = -400f;
+            Label(setup, "PlayersLabel", "setup.players", 38f, new Vector2(leftX, -150f), new Vector2(700f, 56f), TextLight);
+            Button[] counts = ButtonRow(setup, "PlayerCount", new[] { (string)null, null, null }, new Vector2(leftX, -230f), new Vector2(150f, 80f), 20f);
+            for (int i = 0; i < counts.Length; i++)
+            {
+                counts[i].GetComponentInChildren<TMP_Text>().text = (i + 2).ToString();
+            }
 
-            TextMeshProUGUI difficultyLabel = CreateText(setup, "DifficultyLabel", "setup.difficulty", 40f, TextAlignmentOptions.Center, TextLight);
-            Place(difficultyLabel.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -355f), new Vector2(1000f, 60f));
-            Button[] difficulties = ButtonRow(setup, "Difficulty", new[] { "setup.difficulty.easy", "setup.difficulty.medium", "setup.difficulty.hard" }, -440f);
+            Button[] modes = ButtonRow(setup, "Mode", new[] { "setup.mode.individual", "setup.mode.teams" }, new Vector2(leftX, -330f), new Vector2(300f, 80f), 30f);
+
+            var seatRows = new Object[4];
+            var seatLabels = new Object[4];
+            var seatButtons = new Object[4];
+            for (int i = 0; i < 4; i++)
+            {
+                RectTransform row = CreateRect($"SeatRow{i}", setup);
+                Place(row, new Vector2(0.5f, 1f), new Vector2(leftX, -430f - (i * 82f)), new Vector2(640f, 72f));
+                TextMeshProUGUI label = CreateText(row, "Label", "player.human", 34f, TextAlignmentOptions.Left, TextLight);
+                Place(label.rectTransform, Center, new Vector2(-160f, 0f), new Vector2(300f, 64f));
+                Button seatButton = CreateButton(row, "SeatButton", "setup.seat.human", new Vector2(280f, 68f), 32f);
+                Place((RectTransform)seatButton.transform, Center, new Vector2(170f, 0f), new Vector2(280f, 68f));
+                seatRows[i] = row.gameObject;
+                seatLabels[i] = label.GetComponent<LocalizedText>();
+                seatButtons[i] = seatButton;
+            }
+
+            // Columna derecha: reglas y dificultad
+            const float rightX = 400f;
+            Label(setup, "RulesLabel", "setup.rules", 38f, new Vector2(rightX, -150f), new Vector2(700f, 56f), TextLight);
+            var presets = new Object[3];
+            string[] presetKeys = { "setup.preset.classic21", "setup.preset.quick15", "setup.preset.long31" };
+            for (int i = 0; i < presets.Length; i++)
+            {
+                Button preset = CreateButton(setup, $"Preset{i}", presetKeys[i], new Vector2(560f, 78f), 34f);
+                Place((RectTransform)preset.transform, new Vector2(0.5f, 1f), new Vector2(rightX, -230f - (i * 92f)), new Vector2(560f, 78f));
+                presets[i] = preset;
+            }
+
+            Label(setup, "DifficultyLabel", "setup.difficulty", 38f, new Vector2(rightX, -520f), new Vector2(700f, 56f), TextLight);
+            Button[] difficulties = ButtonRow(setup, "Difficulty", new[] { "setup.difficulty.easy", "setup.difficulty.medium", "setup.difficulty.hard" },
+                new Vector2(rightX, -600f), new Vector2(180f, 78f), 16f);
+
+            TextMeshProUGUI needHuman = CreateText(setup, "NeedHuman", "setup.need_human", 30f, TextAlignmentOptions.Center, Gold);
+            Place(needHuman.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 170f), new Vector2(1200f, 50f));
 
             Button back = CreateButton(setup, "BackButton", "common.back", new Vector2(320f, 96f));
-            Place((RectTransform)back.transform, new Vector2(0.5f, 0f), new Vector2(-220f, 90f), new Vector2(320f, 96f));
+            Place((RectTransform)back.transform, new Vector2(0.5f, 0f), new Vector2(-220f, 85f), new Vector2(320f, 96f));
             Button start = CreateButton(setup, "StartButton", "setup.start", new Vector2(320f, 96f));
-            Place((RectTransform)start.transform, new Vector2(0.5f, 0f), new Vector2(220f, 90f), new Vector2(320f, 96f));
+            Place((RectTransform)start.transform, new Vector2(0.5f, 0f), new Vector2(220f, 85f), new Vector2(320f, 96f));
             start.image.color = Gold;
 
             var controller = new GameObject("MainMenuController").AddComponent<MainMenuController>();
+            SetField(controller, "_title", title.gameObject);
             SetField(controller, "_mainPanel", main.gameObject);
             SetField(controller, "_playAiButton", playAi);
-            SetField(controller, "_comingSoonButtons", new UnityEngine.Object[] { playLocal, playOnline, howTo });
+            SetField(controller, "_playLocalButton", playLocal);
+            SetField(controller, "_comingSoonButtons", new Object[] { playOnline, howTo });
             SetField(controller, "_languageButton", language);
             SetField(controller, "_languageLabel", language.GetComponentInChildren<TMP_Text>());
             SetField(controller, "_quitButton", quit);
             SetField(controller, "_setupPanel", setup.gameObject);
+            SetField(controller, "_playerCountButtons", counts);
+            SetField(controller, "_modeButtons", modes);
+            SetField(controller, "_seatRows", seatRows);
+            SetField(controller, "_seatLabels", seatLabels);
+            SetField(controller, "_seatButtons", seatButtons);
             SetField(controller, "_presetButtons", presets);
             SetField(controller, "_difficultyButtons", difficulties);
+            SetField(controller, "_needHumanMessage", needHuman.gameObject);
             SetField(controller, "_startButton", start);
             SetField(controller, "_backButton", back);
 
             Save(scene, SceneNames.MainMenu);
         }
 
+        // ---------------------------------------------------------------- Mesa
+
         private static void BuildGame(GameSettings settings, CardView cardPrefab)
         {
             Scene scene = NewScene();
-            // Crear una escena nueva descarga los assets no usados: recargar referencias por ruta.
             settings = AssetDatabase.LoadAssetAtPath<GameSettings>(DefaultAssetsBuilder.GameSettingsPath);
             cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(CardPrefabPath).GetComponent<CardView>();
             RectTransform safe = CreateCommon(settings, true);
 
             // Zona de mesa (también es la zona donde soltar cartas arrastradas).
             Image tableArea = CreateImage(safe, "TableArea", TableAreaColor, RoundedSprite);
-            Place(tableArea.rectTransform, Center, new Vector2(-40f, 30f), new Vector2(1380f, 500f));
+            Place(tableArea.rectTransform, Center, new Vector2(0f, 20f), new Vector2(1000f, 440f));
+            RectTransform tableAnchor = Anchor(safe, "TableAnchor", new Vector2(0f, 20f));
 
-            RectTransform myHand = Anchor(safe, "MyHandAnchor", new Vector2(-40f, -400f));
-            RectTransform opponentHand = Anchor(safe, "OpponentHandAnchor", new Vector2(-40f, 420f));
-            RectTransform tableAnchor = Anchor(safe, "TableAnchor", new Vector2(-40f, 30f));
-            RectTransform deckAnchor = Anchor(safe, "DeckAnchor", new Vector2(-830f, 30f));
-            RectTransform myPile = Anchor(safe, "MyPileAnchor", new Vector2(820f, -170f));
-            RectTransform opponentPile = Anchor(safe, "OpponentPileAnchor", new Vector2(820f, 330f));
-
-            // Mazo y bazas (dorsos + recuentos)
+            // Mazo (abajo a la izquierda)
+            Vector2 deckPosition = new Vector2(-820f, -330f);
+            RectTransform deckAnchor = Anchor(safe, "DeckAnchor", deckPosition);
             Image deckBack = CreateImage(safe, "DeckBack", Color.white);
-            Place(deckBack.rectTransform, Center, new Vector2(-830f, 30f), new Vector2(126f, 180f));
-            TextMeshProUGUI deckCount = CreateText(safe, "DeckCount", null, 34f, TextAlignmentOptions.Center, TextLight);
-            Place(deckCount.rectTransform, Center, new Vector2(-830f, -90f), new Vector2(200f, 50f));
+            Place(deckBack.rectTransform, Center, deckPosition, new Vector2(126f, 180f));
             TextMeshProUGUI deckLabel = CreateText(safe, "DeckLabel", "game.deck", 28f, TextAlignmentOptions.Center, TextLight);
-            Place(deckLabel.rectTransform, Center, new Vector2(-830f, 150f), new Vector2(220f, 50f));
+            Place(deckLabel.rectTransform, Center, deckPosition + new Vector2(0f, 115f), new Vector2(220f, 44f));
+            TextMeshProUGUI deckCount = CreateText(safe, "DeckCount", null, 34f, TextAlignmentOptions.Center, TextLight);
+            Place(deckCount.rectTransform, Center, deckPosition + new Vector2(0f, -118f), new Vector2(200f, 50f));
 
-            Image myPileBack = PileBack(safe, "MyPileBack", new Vector2(820f, -170f));
-            Image opponentPileBack = PileBack(safe, "OpponentPileBack", new Vector2(820f, 330f));
-            TextMeshProUGUI myPileCount = CreateText(safe, "MyPileCount", null, 28f, TextAlignmentOptions.Center, TextLight);
-            Place(myPileCount.rectTransform, Center, new Vector2(820f, -255f), new Vector2(240f, 40f));
-            TextMeshProUGUI myEscobas = CreateText(safe, "MyEscobas", null, 28f, TextAlignmentOptions.Center, Gold);
-            Place(myEscobas.rectTransform, Center, new Vector2(820f, -292f), new Vector2(240f, 40f));
-            TextMeshProUGUI opponentPileCount = CreateText(safe, "OpponentPileCount", null, 28f, TextAlignmentOptions.Center, TextLight);
-            Place(opponentPileCount.rectTransform, Center, new Vector2(820f, 245f), new Vector2(240f, 40f));
-            TextMeshProUGUI opponentEscobas = CreateText(safe, "OpponentEscobas", null, 28f, TextAlignmentOptions.Center, Gold);
-            Place(opponentEscobas.rectTransform, Center, new Vector2(820f, 208f), new Vector2(240f, 40f));
+            // Huecos de asiento: ancla de mano + ficha (nombre, baza, escobas, repartidor, turno)
+            var handAnchors = new Object[4];
+            var seatPanels = new Object[4];
+            for (int slot = 0; slot < 4; slot++)
+            {
+                handAnchors[slot] = Anchor(safe, $"HandAnchor_{SlotNames[slot]}", HandPositions[slot]);
+                seatPanels[slot] = BuildSeatPanel(safe, $"SeatPanel_{SlotNames[slot]}", SeatPanelPositions[slot]);
+            }
 
             // Capa de cartas (por encima de la mesa y por debajo del HUD)
             RectTransform cardLayer = CreateRect("CardLayer", safe);
             Stretch(cardLayer);
 
-            // Marcador (arriba a la izquierda)
+            // Marcador (arriba a la derecha)
             Image board = CreateImage(safe, "Scoreboard", PanelColor, RoundedSprite);
-            Place(board.rectTransform, new Vector2(0f, 1f), new Vector2(230f, -150f), new Vector2(420f, 260f));
-            TextMeshProUGUI name0 = CreateText(board.transform, "Name0", null, 34f, TextAlignmentOptions.Left, TextLight);
-            Place(name0.rectTransform, new Vector2(0f, 1f), new Vector2(200f, -40f), new Vector2(200f, 50f));
-            TextMeshProUGUI score0 = CreateText(board.transform, "Score0", null, 40f, TextAlignmentOptions.Right, Gold);
-            Place(score0.rectTransform, new Vector2(1f, 1f), new Vector2(-60f, -40f), new Vector2(100f, 50f));
-            TextMeshProUGUI name1 = CreateText(board.transform, "Name1", null, 34f, TextAlignmentOptions.Left, TextLight);
-            Place(name1.rectTransform, new Vector2(0f, 1f), new Vector2(200f, -95f), new Vector2(200f, 50f));
-            TextMeshProUGUI score1 = CreateText(board.transform, "Score1", null, 40f, TextAlignmentOptions.Right, Gold);
-            Place(score1.rectTransform, new Vector2(1f, 1f), new Vector2(-60f, -95f), new Vector2(100f, 50f));
-            GameObject dealer0 = DealerBadge(board.transform, "DealerBadge0", -40f);
-            GameObject dealer1 = DealerBadge(board.transform, "DealerBadge1", -95f);
-            TextMeshProUGUI target = CreateText(board.transform, "Target", null, 26f, TextAlignmentOptions.Left, TextLight);
-            Place(target.rectTransform, new Vector2(0f, 1f), new Vector2(200f, -150f), new Vector2(360f, 40f));
-            TextMeshProUGUI round = CreateText(board.transform, "Round", null, 26f, TextAlignmentOptions.Left, TextLight);
-            Place(round.rectTransform, new Vector2(0f, 1f), new Vector2(200f, -190f), new Vector2(360f, 40f));
-            TextMeshProUGUI turn = CreateText(board.transform, "Turn", null, 28f, TextAlignmentOptions.Left, Gold);
-            Place(turn.rectTransform, new Vector2(0f, 1f), new Vector2(200f, -230f), new Vector2(360f, 40f));
+            Place(board.rectTransform, new Vector2(1f, 1f), new Vector2(-240f, -190f), new Vector2(440f, 340f));
+            TextMeshProUGUI target = BoardText(board.transform, "Target", -30f, 26f, TextLight);
+            TextMeshProUGUI round = BoardText(board.transform, "Round", -68f, 26f, TextLight);
+            TextMeshProUGUI turn = BoardText(board.transform, "Turn", -106f, 28f, Gold);
+            var scoreRows = new Object[4];
+            var scoreNames = new Object[4];
+            var scoreValues = new Object[4];
+            for (int i = 0; i < 4; i++)
+            {
+                RectTransform row = CreateRect($"ScoreRow{i}", board.transform);
+                Place(row, new Vector2(0.5f, 1f), new Vector2(0f, -160f - (i * 46f)), new Vector2(400f, 44f));
+                TextMeshProUGUI rowName = CreateText(row, "Name", null, 28f, TextAlignmentOptions.Left, TextLight);
+                Place(rowName.rectTransform, Center, new Vector2(-40f, 0f), new Vector2(320f, 44f));
+                rowName.textWrappingMode = TextWrappingModes.NoWrap;
+                rowName.overflowMode = TextOverflowModes.Ellipsis;
+                TextMeshProUGUI rowScore = CreateText(row, "Score", null, 34f, TextAlignmentOptions.Right, Gold);
+                Place(rowScore.rectTransform, Center, new Vector2(160f, 0f), new Vector2(80f, 44f));
+                scoreRows[i] = row.gameObject;
+                scoreNames[i] = rowName;
+                scoreValues[i] = rowScore;
+            }
 
             // Indicaciones y botones de jugada
             TextMeshProUGUI hint = CreateText(safe, "Hint", null, 30f, TextAlignmentOptions.Center, TextLight);
-            Place(hint.rectTransform, Center, new Vector2(-40f, -250f), new Vector2(1100f, 50f));
+            Place(hint.rectTransform, Center, new Vector2(0f, -248f), new Vector2(1100f, 50f));
             TextMeshProUGUI sum = CreateText(safe, "Sum", null, 34f, TextAlignmentOptions.Center, Gold);
-            Place(sum.rectTransform, Center, new Vector2(400f, -400f), new Vector2(240f, 60f));
+            Place(sum.rectTransform, Center, new Vector2(420f, -330f), new Vector2(240f, 56f));
             Button undo = CreateButton(safe, "UndoButton", "game.undo", new Vector2(220f, 84f), 36f);
             Place((RectTransform)undo.transform, Center, new Vector2(580f, -470f), new Vector2(220f, 84f));
             Button play = CreateButton(safe, "PlayButton", "game.play", new Vector2(220f, 84f), 36f);
             Place((RectTransform)play.transform, Center, new Vector2(820f, -470f), new Vector2(220f, 84f));
             play.image.color = Gold;
             Button menu = CreateButton(safe, "MenuButton", "game.menu", new Vector2(180f, 70f), 32f);
-            Place((RectTransform)menu.transform, new Vector2(1f, 1f), new Vector2(-110f, -55f), new Vector2(180f, 70f));
+            Place((RectTransform)menu.transform, new Vector2(0f, 1f), new Vector2(110f, -55f), new Vector2(180f, 70f));
             menu.gameObject.AddComponent<GameMenuButton>();
 
             // Aviso grande
             Image bannerBackground = CreateImage(safe, "Banner", new Color(0f, 0f, 0f, 0.6f), RoundedSprite);
-            Place(bannerBackground.rectTransform, Center, new Vector2(-40f, 30f), new Vector2(1100f, 200f));
+            Place(bannerBackground.rectTransform, Center, new Vector2(0f, 20f), new Vector2(1100f, 200f));
             CanvasGroup bannerGroup = bannerBackground.gameObject.AddComponent<CanvasGroup>();
             bannerGroup.blocksRaycasts = false;
             TextMeshProUGUI bannerText = CreateText(bannerBackground.transform, "Text", null, 90f, TextAlignmentOptions.Center, Gold);
@@ -248,12 +298,9 @@ namespace Escoba.Editor.Build
 
             // HUD
             var hud = new GameObject("Hud").AddComponent<HudView>();
-            SetField(hud, "_names", new UnityEngine.Object[] { name0, name1 });
-            SetField(hud, "_scores", new UnityEngine.Object[] { score0, score1 });
-            SetField(hud, "_pileCounts", new UnityEngine.Object[] { myPileCount, opponentPileCount });
-            SetField(hud, "_escobas", new UnityEngine.Object[] { myEscobas, opponentEscobas });
-            SetField(hud, "_pileBacks", new UnityEngine.Object[] { myPileBack, opponentPileBack });
-            SetField(hud, "_dealerBadges", new UnityEngine.Object[] { dealer0, dealer1 });
+            SetField(hud, "_scoreRows", scoreRows);
+            SetField(hud, "_scoreNames", scoreNames);
+            SetField(hud, "_scoreValues", scoreValues);
             SetField(hud, "_target", target);
             SetField(hud, "_round", round);
             SetField(hud, "_turn", turn);
@@ -267,28 +314,68 @@ namespace Escoba.Editor.Build
             SetField(hud, "_bannerGroup", bannerGroup);
             SetField(hud, "_banner", bannerText);
 
-            // Paneles
+            // Paneles superpuestos
             RoundSummaryPanel summary = BuildRoundSummary(safe);
             GameOverPanel gameOver = BuildGameOver(safe);
+            PassScreenPanel passScreen = BuildPassScreen(safe);
 
             // Mesa y controlador
             var table = new GameObject("Table").AddComponent<TablePresenter>();
             SetField(table, "_cardPrefab", cardPrefab);
             SetField(table, "_cardLayer", cardLayer);
-            SetField(table, "_myHandAnchor", myHand);
-            SetField(table, "_opponentHandAnchor", opponentHand);
+            SetField(table, "_handAnchors", handAnchors);
+            SetField(table, "_seatPanels", seatPanels);
             SetField(table, "_tableAnchor", tableAnchor);
             SetField(table, "_tableDropZone", tableArea.rectTransform);
             SetField(table, "_deckAnchor", deckAnchor);
-            SetField(table, "_pileAnchors", new UnityEngine.Object[] { myPile, opponentPile });
             SetField(table, "_hud", hud);
 
             var controller = new GameObject("GameController").AddComponent<GameController>();
             SetField(controller, "_table", table);
             SetField(controller, "_roundSummary", summary);
             SetField(controller, "_gameOver", gameOver);
+            SetField(controller, "_passScreen", passScreen);
 
             Save(scene, SceneNames.Game);
+        }
+
+        private static SeatPanelView BuildSeatPanel(RectTransform parent, string name, Vector2 position)
+        {
+            Image highlight = CreateImage(parent, name, Gold, RoundedSprite);
+            Place(highlight.rectTransform, Center, position, new Vector2(272f, 162f));
+            Image background = CreateImage(highlight.transform, "Background", SeatPanelColor, RoundedSprite);
+            Stretch(background.rectTransform, 6f);
+
+            TextMeshProUGUI playerName = CreateText(highlight.transform, "Name", null, 30f, TextAlignmentOptions.Left, TextLight);
+            Place(playerName.rectTransform, new Vector2(0.5f, 1f), new Vector2(-20f, -32f), new Vector2(210f, 44f));
+            playerName.textWrappingMode = TextWrappingModes.NoWrap;
+            playerName.overflowMode = TextOverflowModes.Ellipsis;
+
+            Image dealer = CreateImage(highlight.transform, "DealerBadge", Gold, RoundedSprite);
+            Place(dealer.rectTransform, new Vector2(1f, 1f), new Vector2(-38f, -32f), new Vector2(64f, 32f));
+            TextMeshProUGUI dealerLabel = CreateText(dealer.transform, "Label", "game.dealer", 18f, TextAlignmentOptions.Center, TextDark);
+            Stretch(dealerLabel.rectTransform, 2f);
+            dealerLabel.enableAutoSizing = true;
+            dealerLabel.fontSizeMin = 10f;
+            dealerLabel.fontSizeMax = 18f;
+
+            Image pileBack = CreateImage(highlight.transform, "PileBack", Color.white);
+            Place(pileBack.rectTransform, new Vector2(0f, 0f), new Vector2(52f, 56f), new Vector2(49f, 70f));
+            pileBack.preserveAspect = true;
+            TextMeshProUGUI pileCount = CreateText(highlight.transform, "PileCount", null, 26f, TextAlignmentOptions.Left, TextLight);
+            Place(pileCount.rectTransform, new Vector2(0f, 0f), new Vector2(170f, 74f), new Vector2(170f, 36f));
+            TextMeshProUGUI escobas = CreateText(highlight.transform, "Escobas", null, 26f, TextAlignmentOptions.Left, Gold);
+            Place(escobas.rectTransform, new Vector2(0f, 0f), new Vector2(170f, 38f), new Vector2(170f, 36f));
+
+            var panel = highlight.gameObject.AddComponent<SeatPanelView>();
+            SetField(panel, "_name", playerName);
+            SetField(panel, "_pileBack", pileBack);
+            SetField(panel, "_pileCount", pileCount);
+            SetField(panel, "_escobas", escobas);
+            SetField(panel, "_dealerBadge", dealer.gameObject);
+            SetField(panel, "_turnHighlight", highlight);
+            highlight.enabled = false;
+            return panel;
         }
 
         private static RoundSummaryPanel BuildRoundSummary(RectTransform parent)
@@ -296,22 +383,30 @@ namespace Escoba.Editor.Build
             Image overlay = CreateImage(parent, "RoundSummary", OverlayColor, null, true);
             Stretch(overlay.rectTransform);
             Image panel = CreateImage(overlay.transform, "Panel", PanelColor, RoundedSprite);
-            Place(panel.rectTransform, Center, Vector2.zero, new Vector2(1000f, 820f));
+            Place(panel.rectTransform, Center, Vector2.zero, new Vector2(1440f, 860f));
 
             TextMeshProUGUI title = CreateText(panel.transform, "Title", null, 60f, TextAlignmentOptions.Center, Gold);
-            Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(900f, 80f));
-            TextMeshProUGUI header0 = CreateText(panel.transform, "Header0", null, 36f, TextAlignmentOptions.Center, Gold);
-            Place(header0.rectTransform, new Vector2(0.5f, 1f), new Vector2(170f, -140f), new Vector2(200f, 50f));
-            TextMeshProUGUI header1 = CreateText(panel.transform, "Header1", null, 36f, TextAlignmentOptions.Center, Gold);
-            Place(header1.rectTransform, new Vector2(0.5f, 1f), new Vector2(370f, -140f), new Vector2(200f, 50f));
+            Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -60f), new Vector2(1200f, 80f));
 
             TextMeshProUGUI labels = CreateText(panel.transform, "Labels", null, 36f, TextAlignmentOptions.TopLeft, TextLight);
-            Place(labels.rectTransform, new Vector2(0.5f, 1f), new Vector2(-210f, -440f), new Vector2(500f, 560f));
-            TextMeshProUGUI column0 = CreateText(panel.transform, "Column0", null, 36f, TextAlignmentOptions.Top, TextLight);
-            Place(column0.rectTransform, new Vector2(0.5f, 1f), new Vector2(170f, -440f), new Vector2(200f, 560f));
-            TextMeshProUGUI column1 = CreateText(panel.transform, "Column1", null, 36f, TextAlignmentOptions.Top, TextLight);
-            Place(column1.rectTransform, new Vector2(0.5f, 1f), new Vector2(370f, -440f), new Vector2(200f, 560f));
-            labels.lineSpacing = column0.lineSpacing = column1.lineSpacing = 10f;
+            Place(labels.rectTransform, new Vector2(0.5f, 1f), new Vector2(-400f, -470f), new Vector2(540f, 580f));
+            labels.lineSpacing = 10f;
+
+            var headers = new Object[4];
+            var columns = new Object[4];
+            for (int i = 0; i < 4; i++)
+            {
+                TextMeshProUGUI header = CreateText(panel.transform, $"Header{i}", null, 30f, TextAlignmentOptions.Center, Gold);
+                Place(header.rectTransform, new Vector2(0.5f, 1f), new Vector2(285f, -140f), new Vector2(185f, 70f));
+                header.enableAutoSizing = true;
+                header.fontSizeMin = 18f;
+                header.fontSizeMax = 30f;
+                TextMeshProUGUI column = CreateText(panel.transform, $"Column{i}", null, 36f, TextAlignmentOptions.Top, TextLight);
+                Place(column.rectTransform, new Vector2(0.5f, 1f), new Vector2(285f, -470f), new Vector2(185f, 580f));
+                column.lineSpacing = 10f;
+                headers[i] = header;
+                columns[i] = column;
+            }
 
             Button next = CreateButton(panel.transform, "NextButton", "summary.next", new Vector2(420f, 90f));
             Place((RectTransform)next.transform, new Vector2(0.5f, 0f), new Vector2(0f, 75f), new Vector2(420f, 90f));
@@ -320,8 +415,8 @@ namespace Escoba.Editor.Build
             var summary = overlay.gameObject.AddComponent<RoundSummaryPanel>();
             SetField(summary, "_title", title);
             SetField(summary, "_labels", labels);
-            SetField(summary, "_headers", new UnityEngine.Object[] { header0, header1 });
-            SetField(summary, "_columns", new UnityEngine.Object[] { column0, column1 });
+            SetField(summary, "_headers", headers);
+            SetField(summary, "_columns", columns);
             SetField(summary, "_nextButton", next);
             overlay.gameObject.SetActive(false);
             return summary;
@@ -332,13 +427,16 @@ namespace Escoba.Editor.Build
             Image overlay = CreateImage(parent, "GameOver", OverlayColor, null, true);
             Stretch(overlay.rectTransform);
             Image panel = CreateImage(overlay.transform, "Panel", PanelColor, RoundedSprite);
-            Place(panel.rectTransform, Center, Vector2.zero, new Vector2(900f, 600f));
+            Place(panel.rectTransform, Center, Vector2.zero, new Vector2(1000f, 680f));
 
-            TextMeshProUGUI title = CreateText(panel.transform, "Title", null, 80f, TextAlignmentOptions.Center, Gold);
-            Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(820f, 120f));
+            TextMeshProUGUI title = CreateText(panel.transform, "Title", null, 76f, TextAlignmentOptions.Center, Gold);
+            Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(920f, 120f));
             title.fontStyle = FontStyles.Bold;
-            TextMeshProUGUI scores = CreateText(panel.transform, "Scores", null, 44f, TextAlignmentOptions.Center, TextLight);
-            Place(scores.rectTransform, Center, new Vector2(0f, 20f), new Vector2(800f, 180f));
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 40f;
+            title.fontSizeMax = 76f;
+            TextMeshProUGUI scores = CreateText(panel.transform, "Scores", null, 40f, TextAlignmentOptions.Center, TextLight);
+            Place(scores.rectTransform, Center, new Vector2(0f, 20f), new Vector2(900f, 260f));
 
             Button menu = CreateButton(panel.transform, "MenuButton", "gameover.main_menu", new Vector2(340f, 90f));
             Place((RectTransform)menu.transform, new Vector2(0.5f, 0f), new Vector2(-200f, 80f), new Vector2(340f, 90f));
@@ -353,6 +451,38 @@ namespace Escoba.Editor.Build
             SetField(gameOver, "_menuButton", menu);
             overlay.gameObject.SetActive(false);
             return gameOver;
+        }
+
+        private static PassScreenPanel BuildPassScreen(RectTransform parent)
+        {
+            // Opaco: no debe dejar ver ninguna carta mientras se pasa el dispositivo.
+            Image overlay = CreateImage(parent, "PassScreen", FeltColor, null, true);
+            Stretch(overlay.rectTransform);
+
+            TextMeshProUGUI title = CreateText(overlay.transform, "Title", null, 72f, TextAlignmentOptions.Center, Gold);
+            Place(title.rectTransform, Center, new Vector2(0f, 200f), new Vector2(1600f, 120f));
+            title.fontStyle = FontStyles.Bold;
+            title.enableAutoSizing = true;
+            title.fontSizeMin = 36f;
+            title.fontSizeMax = 72f;
+
+            TextMeshProUGUI lastPlay = CreateText(overlay.transform, "LastPlay", null, 40f, TextAlignmentOptions.Center, TextLight);
+            Place(lastPlay.rectTransform, Center, new Vector2(0f, 60f), new Vector2(1500f, 120f));
+
+            TextMeshProUGUI hint = CreateText(overlay.transform, "Hint", "pass.hint", 30f, TextAlignmentOptions.Center, TextLight);
+            Place(hint.rectTransform, Center, new Vector2(0f, -40f), new Vector2(1200f, 50f));
+
+            Button confirm = CreateButton(overlay.transform, "ConfirmButton", "pass.confirm", new Vector2(760f, 110f), 40f);
+            Place((RectTransform)confirm.transform, Center, new Vector2(0f, -200f), new Vector2(760f, 110f));
+            confirm.image.color = Gold;
+
+            var pass = overlay.gameObject.AddComponent<PassScreenPanel>();
+            SetField(pass, "_title", title);
+            SetField(pass, "_lastPlay", lastPlay);
+            SetField(pass, "_confirmButton", confirm);
+            SetField(pass, "_confirmLabel", confirm.GetComponentInChildren<LocalizedText>());
+            overlay.gameObject.SetActive(false);
+            return pass;
         }
 
         // ---------------------------------------------------------------- Utilidades
@@ -412,24 +542,20 @@ namespace Escoba.Editor.Build
             return Place(CreateRect(name, parent), Center, position, new Vector2(10f, 10f));
         }
 
-        private static Image PileBack(RectTransform parent, string name, Vector2 position)
+        private static TextMeshProUGUI Label(RectTransform parent, string name, string key, float size, Vector2 position, Vector2 dimensions, Color color)
         {
-            Image image = CreateImage(parent, name, Color.white);
-            Place(image.rectTransform, Center, position, new Vector2(84f, 120f));
-            image.preserveAspect = true;
-            return image;
+            TextMeshProUGUI text = CreateText(parent, name, key, size, TextAlignmentOptions.Center, color);
+            Place(text.rectTransform, new Vector2(0.5f, 1f), position, dimensions);
+            return text;
         }
 
-        private static GameObject DealerBadge(Transform parent, string name, float y)
+        private static TextMeshProUGUI BoardText(Transform board, string name, float y, float size, Color color)
         {
-            Image badge = CreateImage(parent, name, Gold, RoundedSprite);
-            Place(badge.rectTransform, new Vector2(0f, 1f), new Vector2(45f, y), new Vector2(60f, 36f));
-            TextMeshProUGUI label = CreateText(badge.transform, "Label", "game.dealer", 18f, TextAlignmentOptions.Center, TextDark);
-            Stretch(label.rectTransform, 2f);
-            label.enableAutoSizing = true;
-            label.fontSizeMin = 10f;
-            label.fontSizeMax = 18f;
-            return badge.gameObject;
+            TextMeshProUGUI text = CreateText(board, name, null, size, TextAlignmentOptions.Left, color);
+            Place(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(400f, 38f));
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+            return text;
         }
 
         private static Button ComingSoonButton(Transform parent, string name, string key)
@@ -443,16 +569,15 @@ namespace Escoba.Editor.Build
             return button;
         }
 
-        private static Button[] ButtonRow(RectTransform parent, string prefix, string[] keys, float y)
+        /// <summary>Fila de botones centrada en <paramref name="center"/> (anclada arriba del padre).</summary>
+        private static Button[] ButtonRow(RectTransform parent, string prefix, string[] keys, Vector2 center, Vector2 size, float gap)
         {
             var buttons = new Button[keys.Length];
-            const float width = 380f;
-            const float gap = 30f;
-            float start = -((keys.Length - 1) * (width + gap)) / 2f;
+            float start = center.x - ((keys.Length - 1) * (size.x + gap) / 2f);
             for (int i = 0; i < keys.Length; i++)
             {
-                buttons[i] = CreateButton(parent, $"{prefix}{i}", keys[i], new Vector2(width, 90f), 34f);
-                Place((RectTransform)buttons[i].transform, new Vector2(0.5f, 1f), new Vector2(start + (i * (width + gap)), y), new Vector2(width, 90f));
+                buttons[i] = CreateButton(parent, $"{prefix}{i}", keys[i], size, 34f);
+                Place((RectTransform)buttons[i].transform, new Vector2(0.5f, 1f), new Vector2(start + (i * (size.x + gap)), center.y), size);
             }
 
             return buttons;

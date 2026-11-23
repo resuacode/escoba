@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Versión del documento** | 0.4.0 |
+| **Versión del documento** | 0.5.0 |
 | **Fecha** | 2026-11-23 |
 | **Estado** | Borrador inicial (hito M0) |
 | **Motor** | Unity 6000.3.11f1 · uGUI · URP |
@@ -285,3 +285,4 @@ Detalle de diseño e implementación: skill [`escoba-ai`](../.claude/skills/esco
 | 0.2.0 | 2026-11-23 | Setenta clásica como única regla de sietes; móvil solo horizontal; recomendación Photon Fusion 2; arte Kenney analizado (pixel art). |
 | 0.3.0 | 2026-11-23 | Captura obligatoria por defecto; Photon Fusion 2 decidido; localización propia con JSON. |
 | 0.4.0 | 2026-11-23 | M2 implementado: mesa 1v1, menú y configuración; gallego añadido como tercer idioma. |
+| 0.5.0 | 2026-11-23 | M3 implementado: hot-seat con pantalla de pase, 3-4 jugadores, parejas, asientos Humano/IA. Disposición: el que mira abajo, el siguiente a su derecha. Nombres por defecto (nombres personalizados pendientes). |

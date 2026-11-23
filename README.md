@@ -2,7 +2,7 @@
 
 Juego de cartas tradicional **Escoba** con la baraja española, hecho en **Unity 6**. Modos contra la IA y multijugador local (hot‑seat) para 2, 3 o 4 jugadores (parejas), con reglas configurables. Multijugador online con Photon previsto.
 
-> Estado: **M2 completado** — partida 1 contra 1 contra la IA (nivel Fácil) jugable en español, gallego e inglés. Ver [docs/ROADMAP.md](docs/ROADMAP.md).
+> Estado: **M3 completado** — contra la IA (nivel Fácil) o varios jugadores en el mismo dispositivo con pantalla de pase; 2, 3 o 4 jugadores, individual o por parejas; en español, gallego e inglés. Ver [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Documentación
 | Documento | Contenido |
@@ -24,7 +24,7 @@ Juego de cartas tradicional **Escoba** con la baraja española, hecho en **Unity
 ## Puesta en marcha
 1. Clona el repositorio y ábrelo con Unity Hub (versión 6000.3.11f1).
 2. La primera apertura descarga los paquetes, incluido **MCP for Unity** desde GitHub (`com.coplaydev.unity-mcp`, `v10.0.0`).
-3. Abre la escena `Assets/_Project/Scenes/Boot.unity` y pulsa Play: menú principal → "Jugar contra la IA" → elige reglas → "Empezar".
+3. Abre la escena `Assets/_Project/Scenes/Boot.unity` y pulsa Play: menú principal → "Jugar contra la IA" (tú contra la IA) o "Jugar en este dispositivo" (varios humanos, con pantalla de pase) → elige jugadores, individual o por parejas, Humano/IA por asiento y reglas → "Empezar".
 4. Si cambias assets o maquetación, regenera todo con **Escoba → Build → Rebuild All (assets + scenes)**.
 
 ### Cómo se juega en la mesa
