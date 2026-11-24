@@ -1,0 +1,96 @@
+# Versión web de pruebas: tras cada CI en verde sobre master, compila WebGL y la publica en
+# GitHub Pages bajo /dev/. La raíz del sitio conserva la última release estable (si existe).
+# Requiere: secrets de Unity y Pages configurado con "GitHub Actions" como origen (ver docs/CI.md).
+name: Web (dev)
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build WebGL (dev)
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+          lfs: false
+
+      - name: Calcular versión (última etiqueta + dev + commit)
+        id: version
+        run: |
+          base=$(git describe --tags --abbrev=0 2>/dev/null || echo "v$(grep -m1 'bundleVersion:' ProjectSettings/ProjectSettings.asset | awk '{print $2}')")
+          sha=$(git rev-parse --short HEAD)
+          version="${base#v}-dev.${{ github.run_number }}+${sha}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Versión: ${version}"
+
+      - name: Caché de Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-WebGL-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-WebGL-
+
+      - name: Build WebGL
+        uses: game-ci/unity-builder@v6
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: WebGL
+          buildName: Escoba
+          versioning: Custom
+          version: ${{ steps.version.outputs.version }}
+
+      - name: Montar sitio (raíz = última release, /dev/ = esta build)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p site/dev
+          cp -r build/WebGL/Escoba/. site/dev/
+          if gh release download --repo "$GITHUB_REPOSITORY" --pattern 'Escoba-*-WebGL.zip' --dir stable 2>/dev/null; then
+            unzip -q stable/*.zip -d site/
+          else
+            cp .github/pages/index.html site/index.html
+          fi
+          touch site/.nojekyll
+
+      - name: Configurar Pages
+        uses: actions/configure-pages@v5
+
+      - name: Subir sitio
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    name: Publicar en GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}dev/
+    steps:
+      - name: Desplegar
+        id: deployment
+        uses: actions/deploy-pages@v4

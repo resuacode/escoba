@@ -1,0 +1,231 @@
+# Release: al subir una etiqueta vX.Y.Z (p. ej. v0.4.0) ejecuta los tests, compila WebGL,
+# Windows y Android, crea la release de GitHub con los ficheros y las notas del CHANGELOG,
+# publica la web estable en la raíz de GitHub Pages y, si está configurado, sube a itch.io.
+# Ver docs/CI.md (secrets, variables y pasos manuales) y la skill /release.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Versión
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      code: ${{ steps.version.outputs.code }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - id: version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          core="${version%%-*}"
+          IFS='.' read -r major minor patch <<< "$core"
+          code=$(( major * 10000 + minor * 100 + patch ))
+          prerelease=false
+          [[ "$version" == *-* ]] && prerelease=true
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${prerelease}" >> "$GITHUB_OUTPUT"
+          echo "Versión ${version} (versionCode ${code}, prerelease ${prerelease})"
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-tests-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-tests-
+      - uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          testMode: all
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Resultados de tests (release)
+
+  build:
+    name: Build ${{ matrix.targetPlatform }}
+    needs: [version, tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform: [WebGL, StandaloneWindows64, Android]
+    steps:
+      - name: Liberar espacio en disco (Android)
+        if: matrix.targetPlatform == 'Android'
+        uses: jlumbroso/free-disk-space@v1.3.1
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+
+      - name: Build
+        uses: game-ci/unity-builder@v6
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: Escoba
+          versioning: Custom
+          version: ${{ needs.version.outputs.version }}
+          androidVersionCode: ${{ needs.version.outputs.code }}
+          androidExportType: androidPackage
+          # Sin keystore configurado, el APK sale firmado con la clave de depuración (válido para pruebas).
+          androidKeystoreName: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && 'escoba.keystore' || '' }}
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.targetPlatform }}
+          path: build/${{ matrix.targetPlatform }}
+          retention-days: 7
+
+  publish:
+    name: Crear release de GitHub
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Empaquetar
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          mkdir -p dist
+          (cd artifacts/build-WebGL/Escoba && zip -qr "../../../dist/Escoba-${VERSION}-WebGL.zip" .)
+          (cd artifacts/build-StandaloneWindows64 && zip -qr "../../dist/Escoba-${VERSION}-Windows.zip" .)
+          cp artifacts/build-Android/*.apk "dist/Escoba-${VERSION}-Android.apk"
+          ls -la dist
+
+      - name: Notas de la versión (sección del CHANGELOG)
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          awk -v header="## [$VERSION]" '
+            index($0, header) == 1 { found = 1; next }
+            found && index($0, "## [") == 1 { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "Consulta [CHANGELOG.md](CHANGELOG.md) para los cambios de esta versión." > notes.md
+          fi
+          {
+            echo
+            echo "### Descargas"
+            echo "- **Web**: también jugable en GitHub Pages."
+            echo "- **Windows**: descomprime el zip y ejecuta \`Escoba.exe\`."
+            echo "- **Android**: instala el APK (permite instalar apps de orígenes desconocidos)."
+          } >> notes.md
+          cat notes.md
+
+      - name: Crear release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+          PRERELEASE: ${{ needs.version.outputs.prerelease }}
+        run: |
+          flags=""
+          [ "$PRERELEASE" = "true" ] && flags="--prerelease"
+          gh release create "$GITHUB_REF_NAME" dist/* --title "Escoba ${VERSION}" --notes-file notes.md $flags
+
+  pages:
+    name: Publicar web estable
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-WebGL
+          path: webgl
+
+      - name: Montar sitio (raíz = esta release; /dev/ = la misma hasta el siguiente push a master)
+        run: |
+          mkdir -p site/dev
+          cp -r webgl/Escoba/. site/
+          cp -r webgl/Escoba/. site/dev/
+          touch site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  itch:
+    name: Subir a itch.io
+    needs: [version, build]
+    if: vars.ITCH_TARGET != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Instalar butler
+        run: |
+          curl -sSL -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          ./butler/butler -V
+
+      - name: Publicar canales (html5, windows, android)
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          TARGET: ${{ vars.ITCH_TARGET }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          ./butler/butler push artifacts/build-WebGL/Escoba "${TARGET}:html5" --userversion "$VERSION"
+          ./butler/butler push artifacts/build-StandaloneWindows64 "${TARGET}:windows" --userversion "$VERSION"
+          ./butler/butler push artifacts/build-Android "${TARGET}:android" --userversion "$VERSION"

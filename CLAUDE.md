@@ -75,6 +75,7 @@ Para cualquier feature usa la skill **`unity-feature`**. Resumen:
 - Nunca commitear `Library/`, `Temp/`, `Logs/`, `UserSettings/`, `Build*/`. **Siempre** commitear los `.meta` junto a su asset.
 - Ramas `feature/<tema>`, `fix/<tema>`; commits pequeños en español (`feat: captura de cartas a 15`). Solo commitear/pushear cuando el usuario lo pida.
 - Assets de terceros con su licencia en la carpeta (p. ej. `Art/Cards/Kenney/License.txt`).
+- CI/CD en `.github/workflows/` (ver [docs/CI.md](docs/CI.md)): tests en cada push, web de pruebas en GitHub Pages `/dev/` tras cada CI verde en `master`, releases al subir etiquetas `vX.Y.Z` (skill `release`). No pushear etiquetas ni ramas sin que el usuario lo pida. Nunca commitear `.ulf`, keystores ni contraseñas.
 
 ## 9. Skills del proyecto (`.claude/skills/`)
 | Skill | Cuándo |
@@ -88,6 +89,7 @@ Para cualquier feature usa la skill **`unity-feature`**. Resumen:
 | `card-skin` | Importar o sustituir la baraja (sprites). |
 | `gdd` | Ampliar o modificar el GDD. |
 | `update-docs` | Sincronizar README, GDD, ARCHITECTURE, ROADMAP y CHANGELOG. |
+| `release` | Preparar y publicar una versión (CHANGELOG, versión, etiqueta) y revisar el CI/CD. |
 
 ## 10. Glosario
 - **Baraja española**: oros, copas, espadas, bastos; 1‑7, sota (10), caballo (11), rey (12). En la Escoba valen 1‑7, sota 8, caballo 9, rey 10.

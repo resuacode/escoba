@@ -82,6 +82,12 @@ docs/                   Documentación
 | iOS | Orientación horizontal, requiere macOS + Xcode para compilar |
 | WebGL | Compresión Brotli; sin hilos |
 
+## CI/CD
+- **CI**: tests EditMode + PlayMode en cada push y pull request (GitHub Actions + GameCI).
+- **Web**: estable en <https://resuacode.es/escoba/> y versión de pruebas (cada push a `master` con tests en verde) en <https://resuacode.es/escoba/dev/>.
+- **Releases**: una etiqueta `vX.Y.Z` genera la release de GitHub con WebGL, Windows y Android (APK), publica la web estable y sube a itch.io.
+- Configuración (secrets de Unity, Pages en `resuacode.es/escoba`, itch.io, keystore) y proceso: [docs/CI.md](docs/CI.md) y skill `/release`.
+
 ## Créditos y licencias
 - Cartas temporales: **Kenney — Playing Cards Pack** ([kenney.nl](https://kenney.nl/assets/playing-cards-pack)), licencia **CC0**.
 - MCP for Unity: [CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp) (MIT), solo herramienta de desarrollo.

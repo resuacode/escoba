@@ -58,6 +58,16 @@ Estado: **M0–M4 completados; siguiente M5** · Última actualización: 2026-11
 - [x] 178 tests EditMode (incl. `BotTests`, `BalanceTests`) + 8 PlayMode en verde (2026-11-23)
 - [ ] Pendiente (M5): medir tiempos en móvil/WebGL; valorar un Fácil algo más fuerte según playtests
 
+## CI/CD (entre M4 y M5)
+- [x] Tests automáticos en cada push/PR (`ci.yml`)
+- [x] Web de pruebas en GitHub Pages `/dev/` tras cada CI verde en `master` (`web-dev.yml`)
+- [x] Releases por etiqueta con WebGL, Windows y Android APK + web estable + itch.io (`release.yml`)
+- [x] Secrets de Unity, regla `v*` del entorno github-pages e itch.io configurados (2026-11-24)
+- [x] Keystore de Android generado (fuera del repo) y *Custom Keystore* activado; [ ] faltan sus 4 secrets en GitHub
+- [x] Pages: origen GitHub Actions + HTTPS; web en `resuacode.es/escoba/` (estable) y `resuacode.es/escoba/dev/` (pruebas)
+- [ ] Primera ejecución real de los workflows y primera release (`v0.4.0`)
+- [ ] iOS: fuera de CI por ahora
+
 ## M5 — Pulido
 - [ ] Audio, partículas, "¡Escoba!"
 - [ ] Pantalla de ajustes y accesibilidad (idiomas es/gl/en ya disponibles desde M2)

@@ -126,6 +126,10 @@ namespace Escoba.Editor.Build
             Button language = CreateButton(main, "LanguageButton", null, new Vector2(680f, 96f));
             Button quit = CreateButton(main, "QuitButton", "menu.quit", new Vector2(680f, 96f));
 
+            TextMeshProUGUI version = CreateText(safe, "Version", null, 24f, TextAlignmentOptions.BottomRight, new Color(1f, 1f, 1f, 0.6f));
+            Place(version.rectTransform, new Vector2(1f, 0f), new Vector2(-220f, 30f), new Vector2(420f, 40f));
+            version.gameObject.AddComponent<VersionLabel>();
+
             // Nueva partida (dos columnas)
             Image setupBackground = CreateImage(safe, "SetupPanel", PanelColor, RoundedSprite, true);
             RectTransform setup = setupBackground.rectTransform;

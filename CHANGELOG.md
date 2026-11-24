@@ -3,6 +3,14 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+### Added — CI/CD
+- GitHub Actions con GameCI: `ci.yml` (tests EditMode + PlayMode en cada push/PR), `web-dev.yml` (WebGL a GitHub Pages `/dev/` tras cada CI verde en `master`) y `release.yml` (etiqueta `vX.Y.Z` → builds WebGL, Windows y Android APK, release de GitHub con notas del CHANGELOG, web estable en la raíz de Pages e itch.io opcional).
+- `docs/CI.md` (configuración: secrets de Unity, Pages en `resuacode.es/escoba`, itch.io, keystore de Android) y skill `/release`.
+- Etiqueta de versión en el menú principal (`VersionLabel`).
+
+### Changed
+- Player Settings: compañía `resuacode`, identificador `es.resuacode.escoba` (antes el de la plantilla), versión `0.4.0` (`versionCode` 400) y WebGL con *Decompression Fallback* activado (necesario en GitHub Pages).
+
 ### Added — M4: IA Media y Difícil
 - `MediumBot`: heurística con pesos configurables (`HeuristicWeights`): escobas, siete de oros, sietes, oros, cartas y mejora de la setenta; penaliza dejar escoba o sietes/oros al rival.
 - `HardBot`: conteo de cartas no vistas (`BotKnowledge`) y muestreo Monte Carlo de la mano del siguiente rival para restar su mejor respuesta.

@@ -145,3 +145,11 @@ crashlytics-build.properties
 
 # Capturas de pantalla de pruebas (MCP / ScreenCapture)
 /Screenshots/
+
+# Ficheros temporales del Test Framework (ejecuciones de PlayMode)
+/[Aa]ssets/[Rr]esources/PerformanceTestRun*
+/[Aa]ssets/[Rr]esources/PerformanceTestRun*.meta
+
+# Firma de Android: el keystore nunca se sube (va en GitHub Secrets; ver docs/CI.md)
+*.keystore
+*.jks
