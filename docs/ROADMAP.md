@@ -1,6 +1,6 @@
 # Roadmap
 
-Estado: **M0–M4 completados; siguiente M5** · Última actualización: 2026-11-23
+Estado: **M0–M4 completados, versión 0.4.0; siguiente M5** · Última actualización: 2026-11-24
 
 ## M0 — Setup del proyecto
 - [x] CLAUDE.md, skills de proyecto y `.mcp.json`
@@ -63,9 +63,10 @@ Estado: **M0–M4 completados; siguiente M5** · Última actualización: 2026-11
 - [x] Web de pruebas en GitHub Pages `/dev/` tras cada CI verde en `master` (`web-dev.yml`)
 - [x] Releases por etiqueta con WebGL, Windows y Android APK + web estable + itch.io (`release.yml`)
 - [x] Secrets de Unity, regla `v*` del entorno github-pages e itch.io configurados (2026-11-24)
-- [x] Keystore de Android generado (fuera del repo) y *Custom Keystore* activado; [ ] faltan sus 4 secrets en GitHub
+- [x] Keystore de Android generado (fuera del repo), *Custom Keystore* activado y sus 4 secrets en GitHub (2026-11-24)
 - [x] Pages: origen GitHub Actions + HTTPS; web en `resuacode.es/escoba/` (estable) y `resuacode.es/escoba/dev/` (pruebas)
-- [ ] Primera ejecución real de los workflows y primera release (`v0.4.0`)
+- [x] Primera ejecución de CI y Web (dev): tests en verde y web de pruebas funcionando (2026-11-24)
+- [ ] Primera release **`v0.4.0`** (M0–M4 + CI/CD): etiqueta creada el 2026-11-24; pendiente de comprobar release, web estable e itch.io
 - [ ] iOS: fuera de CI por ahora
 
 ## M5 — Pulido

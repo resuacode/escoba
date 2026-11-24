@@ -3,6 +3,10 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+
+## [0.4.0] - 2026-11-24
+Primera versión publicada: Escoba jugable contra la IA (Fácil, Media y Difícil) o en un mismo dispositivo, de 2 a 4 jugadores y por parejas, en español, gallego e inglés.
+
 ### Added — CI/CD
 - GitHub Actions con GameCI: `ci.yml` (tests EditMode + PlayMode en cada push/PR), `web-dev.yml` (WebGL a GitHub Pages `/dev/` tras cada CI verde en `master`) y `release.yml` (etiqueta `vX.Y.Z` → builds WebGL, Windows y Android APK, release de GitHub con notas del CHANGELOG, web estable en la raíz de Pages e itch.io opcional).
 - `docs/CI.md` (configuración: secrets de Unity, Pages en `resuacode.es/escoba`, itch.io, keystore de Android) y skill `/release`.
