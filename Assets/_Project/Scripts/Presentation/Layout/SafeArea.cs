@@ -2,10 +2,16 @@ using UnityEngine;
 
 namespace Escoba.Presentation
 {
-    /// <summary>Ajusta este RectTransform a la zona segura de la pantalla (muescas de móviles).</summary>
+    /// <summary>
+    /// Ajusta este RectTransform a la zona segura de la pantalla (muescas, esquinas redondeadas,
+    /// barras del sistema) y deja además un margen interior para que nada quede pegado al borde.
+    /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public sealed class SafeArea : MonoBehaviour
     {
+        [Tooltip("Margen interior en unidades del Canvas (el mismo que SafeCanvasScaler.Margin).")]
+        [SerializeField, Min(0f)] private float _padding = 24f;
+
         private Rect _applied;
         private Vector2Int _screen;
 
@@ -35,8 +41,8 @@ namespace Escoba.Presentation
             var rect = (RectTransform)transform;
             rect.anchorMin = new Vector2(safe.xMin / Screen.width, safe.yMin / Screen.height);
             rect.anchorMax = new Vector2(safe.xMax / Screen.width, safe.yMax / Screen.height);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
+            rect.offsetMin = new Vector2(_padding, _padding);
+            rect.offsetMax = new Vector2(-_padding, -_padding);
         }
     }
 }

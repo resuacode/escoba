@@ -131,6 +131,12 @@ MonoBehaviour:
   _shade: {fileID: 1295961190855021934}
   _candidateColor: {r: 0.35, g: 0.85, b: 1, a: 0.9}
   _selectedColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  _contrastCandidateColor: {r: 1, g: 1, b: 1, a: 1}
+  _contrastSelectedColor: {r: 1, g: 0.42, b: 0, a: 1}
+  _borderWidth: 8
+  _contrastBorderWidth: 15
+  _shadeAlpha: 0.45
+  _contrastShadeAlpha: 0.72
 --- !u!1 &4051972628150459762
 GameObject:
   m_ObjectHideFlags: 0

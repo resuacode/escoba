@@ -161,6 +161,7 @@ namespace Escoba.Tests.PlayMode
             "escoba.setup.ai.players", "escoba.setup.ai.teams", "escoba.setup.ai.seats",
             "escoba.setup.name.0", "escoba.setup.name.1", "escoba.setup.name.2", "escoba.setup.name.3", "escoba.lastPreset",
             "escoba.language", "escoba.settings.musicVolume", "escoba.settings.sfxVolume", "escoba.settings.animationSpeed",
+            "escoba.settings.highContrast", "escoba.settings.largeUi",
         };
 
         private Dictionary<string, string> _prefsBackup;
@@ -329,6 +330,49 @@ namespace Escoba.Tests.PlayMode
             }
 
             summary.Continue();
+        }
+
+        [UnityTest]
+        public IEnumerator Accessibility_HighContrastAndLargeUi_ApplyInGame()
+        {
+            yield return EnsureAppContext();
+            UserSettings user = AppContext.User;
+            bool previousContrast = user.HighContrast;
+            bool previousLarge = user.LargeUi;
+            user.SetHighContrast(false);
+            user.SetLargeUi(false);
+
+            GameController controller = null;
+            yield return LoadGame(MatchConfig.Versus(DefaultPreset(), BotDifficulty.Easy), false, 40f, c => controller = c);
+            var table = Object.FindFirstObjectByType<TablePresenter>();
+            yield return WaitFor(() => table.IsWaitingForHuman, 20f);
+            Assert.That(table.IsWaitingForHuman, Is.True);
+
+            // Seleccionar la primera carta de la mano: queda resaltada.
+            Card first = controller.ViewFor(table.ViewerSeat).Hand[0];
+            CardView card = Object.FindObjectsByType<CardView>(FindObjectsSortMode.None).First(v => v.Card.HasValue && v.Card.Value == first);
+            card.OnPointerClick(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current));
+            yield return null;
+            Assert.That(card.Highlight, Is.EqualTo(CardHighlight.Selected));
+            Color normal = card.HighlightColor;
+
+            user.SetHighContrast(true);
+            Assert.That(AccessibilityOptions.HighContrast, Is.True);
+            Assert.That(card.HighlightColor, Is.Not.EqualTo(normal), "el alto contraste cambia el resaltado al momento");
+
+            var button = Object.FindFirstObjectByType<ScalableButton>();
+            var label = Object.FindObjectsByType<ScalableText>(FindObjectsSortMode.None).Select(t => t.GetComponent<TMP_Text>()).First(t => t.gameObject.activeInHierarchy);
+            float maxBefore = label.enableAutoSizing ? label.fontSizeMax : label.fontSize;
+            user.SetLargeUi(true);
+            Assert.That(button.transform.localScale.x, Is.EqualTo(button.LargeScale).Within(0.001f), "los botones de jugada crecen");
+            Assert.That(label.enableAutoSizing, Is.True);
+            Assert.That(label.fontSizeMax, Is.GreaterThan(maxBefore), "los textos pueden crecer");
+
+            user.SetLargeUi(false);
+            Assert.That(button.transform.localScale.x, Is.EqualTo(1f).Within(0.001f));
+
+            user.SetHighContrast(previousContrast);
+            user.SetLargeUi(previousLarge);
         }
 
         private static void AssertNoMissingTexts()

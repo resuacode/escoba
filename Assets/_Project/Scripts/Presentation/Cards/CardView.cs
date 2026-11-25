@@ -12,13 +12,23 @@ namespace Escoba.Presentation
     /// se resalta, se anima entre posiciones y notifica toques y arrastres. No conoce las reglas.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
-    public sealed class CardView : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public sealed class CardView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         [SerializeField] private Image _image;
         [SerializeField] private Image _highlight;
         [SerializeField] private Image _shade;
         [SerializeField] private Color _candidateColor = new Color(0.35f, 0.85f, 1f, 0.9f);
         [SerializeField] private Color _selectedColor = new Color(1f, 0.85f, 0.2f, 1f);
+
+        [Header("Alto contraste (no depende solo del color)")]
+        [SerializeField] private Color _contrastCandidateColor = Color.white;
+        [SerializeField] private Color _contrastSelectedColor = new Color(1f, 0.42f, 0f, 1f);
+        [SerializeField] private float _borderWidth = 8f;
+        [SerializeField] private float _contrastBorderWidth = 15f;
+        [SerializeField] private float _shadeAlpha = 0.45f;
+        [SerializeField] private float _contrastShadeAlpha = 0.72f;
+
+        private CardHighlight _currentHighlight;
 
         private CardSkin _skin;
         private RectTransform _rect;
@@ -33,6 +43,9 @@ namespace Escoba.Presentation
 
         /// <summary>Termina un arrastre.</summary>
         public event Action<CardView, PointerEventData> DragEnded;
+
+        /// <summary>El puntero entra en la carta (ratón por encima, o inicio de un toque).</summary>
+        public event Action<CardView, PointerEventData> PointerEntered;
 
         /// <summary>RectTransform de la carta.</summary>
         public RectTransform Rect => _rect != null ? _rect : (_rect = (RectTransform)transform);
@@ -81,16 +94,33 @@ namespace Escoba.Presentation
             _image.sprite = FaceUp ? _skin.GetFace(Card.Value) : _skin.Back;
         }
 
-        /// <summary>Resalta la carta.</summary>
+        /// <summary>Resaltado actual.</summary>
+        public CardHighlight Highlight => _currentHighlight;
+
+        /// <summary>Color del resaltado actual (pruebas).</summary>
+        public Color HighlightColor => _highlight != null ? _highlight.color : Color.clear;
+
+        /// <summary>
+        /// Resalta la carta. En alto contraste (<see cref="AccessibilityOptions.HighContrast"/>) usa
+        /// blanco para las candidatas y naranja intenso para la seleccionada, con un borde más grueso.
+        /// </summary>
         public void SetHighlight(CardHighlight highlight)
         {
+            _currentHighlight = highlight;
             if (_highlight == null)
             {
                 return;
             }
 
+            bool contrast = AccessibilityOptions.HighContrast;
             _highlight.enabled = highlight != CardHighlight.None;
-            _highlight.color = highlight == CardHighlight.Selected ? _selectedColor : _candidateColor;
+            _highlight.color = highlight == CardHighlight.Selected
+                ? (contrast ? _contrastSelectedColor : _selectedColor)
+                : (contrast ? _contrastCandidateColor : _candidateColor);
+            float border = contrast ? _contrastBorderWidth : _borderWidth;
+            RectTransform rect = _highlight.rectTransform;
+            rect.offsetMin = new Vector2(-border, -border);
+            rect.offsetMax = new Vector2(border, border);
         }
 
         /// <summary>Oscurece la carta (no seleccionable).</summary>
@@ -99,6 +129,9 @@ namespace Escoba.Presentation
             if (_shade != null)
             {
                 _shade.enabled = dimmed;
+                Color color = _shade.color;
+                color.a = AccessibilityOptions.HighContrast ? _contrastShadeAlpha : _shadeAlpha;
+                _shade.color = color;
             }
         }
 
@@ -155,6 +188,11 @@ namespace Escoba.Presentation
             Clicked?.Invoke(this, eventData);
         }
 
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            PointerEntered?.Invoke(this, eventData);
+        }
+
         public void OnBeginDrag(PointerEventData eventData)
         {
             if (!DragEnabled)
@@ -193,9 +231,24 @@ namespace Escoba.Presentation
             DragEnded?.Invoke(this, eventData);
         }
 
+        private void OnEnable()
+        {
+            AccessibilityOptions.Changed += ApplyAccessibility;
+        }
+
         private void OnDisable()
         {
             _move = null;
+            AccessibilityOptions.Changed -= ApplyAccessibility;
+        }
+
+        private void ApplyAccessibility()
+        {
+            SetHighlight(_currentHighlight);
+            if (_shade != null)
+            {
+                SetDimmed(_shade.enabled);
+            }
         }
 
         private void StopMove()

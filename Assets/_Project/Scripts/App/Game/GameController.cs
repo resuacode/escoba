@@ -177,7 +177,14 @@ namespace Escoba.App
                 }
 
                 PlayCardCommand command = null;
+                System.Diagnostics.Stopwatch watch = controller.IsLocalHuman ? null : System.Diagnostics.Stopwatch.StartNew();
                 controller.RequestCommand(_engine.GetView(seat), c => command = c);
+                if (watch != null)
+                {
+                    // La IA responde en el acto: así se mide su tiempo de decisión (medidor oculto).
+                    PerfStats.RecordBotDecision(watch.Elapsed.TotalMilliseconds);
+                }
+
                 yield return new WaitUntil(() => command != null);
 
                 CommandValidation validation = _engine.Validate(command);

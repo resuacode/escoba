@@ -51,6 +51,9 @@ Norma de referencia: **Normas ortográficas e morfolóxicas do idioma galego (RA
 | Pulsar un botón | **premer** (acepción informática) | DRAG *premer* |
 | Atajo | **atallo** ("procedemento para facer algo en menos tempo") | DRAG *atallo* |
 | Desarrollo / sonido / herramienta | **desenvolvemento**, **son**, **ferramenta** | DRAG |
+| Sí (interruptor) | **Si** / **Non** (adverbio de afirmación *si*, sin tilde; en gallego tampoco lleva tilde el pronombre *si*) | DRAG *si* (consulta 2026-11-25) |
+| Daltonismo / contraste | **daltonismo**, **contraste** ("Alto contraste (daltonismo)") | DRAG (consulta 2026-11-25) |
+| Interfaz | **interface** (femenino: "Interface grande") | DRAG *interface* |
 | Pretéritos | **xogou, levou, deixou, fixo, gañou** (sin tiempos compuestos: "Ha ganado" → "Gañou") | formas normativas |
 
 `LocalizationTests.Galician_FollowsRagNormDecisions` vigila estas decisiones y la ausencia de grafías portuguesas (ç, ã, õ, lh...).

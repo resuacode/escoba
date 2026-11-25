@@ -129,6 +129,7 @@ namespace Escoba.Editor.Build
             TextMeshProUGUI version = CreateText(safe, "Version", null, 24f, TextAlignmentOptions.BottomRight, new Color(1f, 1f, 1f, 0.6f));
             Place(version.rectTransform, new Vector2(1f, 0f), new Vector2(-220f, 30f), new Vector2(420f, 40f));
             version.gameObject.AddComponent<VersionLabel>();
+            version.raycastTarget = true;
 
             Button credits = CreateButton(safe, "CreditsButton", "menu.credits", new Vector2(240f, 64f), 30f);
             Place((RectTransform)credits.transform, new Vector2(0f, 0f), new Vector2(150f, 62f), new Vector2(240f, 64f));
@@ -302,11 +303,14 @@ namespace Escoba.Editor.Build
             Place(sum.rectTransform, Center, new Vector2(420f, -330f), new Vector2(240f, 56f));
             Button undo = CreateButton(safe, "UndoButton", "game.undo", new Vector2(220f, 84f), 36f);
             Place((RectTransform)undo.transform, Center, new Vector2(580f, -470f), new Vector2(220f, 84f));
+            LargeButton(undo, new Vector2(-80f, 10f));
             Button play = CreateButton(safe, "PlayButton", "game.play", new Vector2(220f, 84f), 36f);
             Place((RectTransform)play.transform, Center, new Vector2(820f, -470f), new Vector2(220f, 84f));
+            LargeButton(play, new Vector2(-30f, 10f));
             play.image.color = Gold;
             Button menu = CreateButton(safe, "MenuButton", "game.menu", new Vector2(180f, 70f), 32f);
             Place((RectTransform)menu.transform, new Vector2(0f, 1f), new Vector2(110f, -55f), new Vector2(180f, 70f));
+            LargeButton(menu, new Vector2(12f, -6f));
             var menuButton = menu.gameObject.AddComponent<GameMenuButton>();
 
             // Aviso grande
@@ -565,41 +569,48 @@ namespace Escoba.Editor.Build
         {
             Image background = CreateImage(parent, "SettingsPanel", PanelColor, RoundedSprite, true);
             RectTransform panel = background.rectTransform;
-            Place(panel, Center, Vector2.zero, new Vector2(1300f, 940f));
+            Place(panel, Center, Vector2.zero, new Vector2(1300f, 1000f));
             Label(panel, "Title", "menu.settings", 60f, new Vector2(0f, -60f), new Vector2(1000f, 80f), Gold);
 
             const float labelX = -380f;
             const float controlX = 200f;
             const float controlWidth = 700f;
 
-            SettingsLabel(panel, "LanguageLabel", "menu.language", labelX, -180f);
-            Button[] languages = ButtonRow(panel, "Language", new[] { (string)null, null, null }, new Vector2(controlX, -180f), new Vector2(220f, 80f), 20f);
+            SettingsLabel(panel, "LanguageLabel", "menu.language", labelX, -165f);
+            Button[] languages = ButtonRow(panel, "Language", new[] { (string)null, null, null }, new Vector2(controlX, -165f), new Vector2(220f, 80f), 20f);
 
-            SettingsLabel(panel, "MusicLabel", "settings.music", labelX, -300f);
+            SettingsLabel(panel, "MusicLabel", "settings.music", labelX, -262f);
             Slider music = CreateSlider(panel, "MusicSlider", new Vector2(controlWidth, 40f));
-            Place((RectTransform)music.transform, new Vector2(0.5f, 1f), new Vector2(controlX, -300f), new Vector2(controlWidth, 40f));
+            Place((RectTransform)music.transform, new Vector2(0.5f, 1f), new Vector2(controlX, -262f), new Vector2(controlWidth, 40f));
 
-            SettingsLabel(panel, "SfxLabel", "settings.sfx", labelX, -410f);
+            SettingsLabel(panel, "SfxLabel", "settings.sfx", labelX, -352f);
             Slider sfx = CreateSlider(panel, "SfxSlider", new Vector2(controlWidth, 40f));
-            Place((RectTransform)sfx.transform, new Vector2(0.5f, 1f), new Vector2(controlX, -410f), new Vector2(controlWidth, 40f));
+            Place((RectTransform)sfx.transform, new Vector2(0.5f, 1f), new Vector2(controlX, -352f), new Vector2(controlWidth, 40f));
 
-            SettingsLabel(panel, "SpeedLabel", "settings.speed", labelX, -530f);
+            SettingsLabel(panel, "SpeedLabel", "settings.speed", labelX, -450f);
             Button[] speeds = ButtonRow(panel, "Speed", new[] { "settings.speed.slow", "settings.speed.normal", "settings.speed.fast" },
-                new Vector2(controlX, -530f), new Vector2(220f, 80f), 20f);
+                new Vector2(controlX, -450f), new Vector2(220f, 80f), 20f);
+
+            Button highContrast = ToggleRow(panel, "HighContrast", "settings.high_contrast", labelX, controlX, -547f, controlWidth);
+            Button largeUi = ToggleRow(panel, "LargeUi", "settings.large_ui", labelX, controlX, -644f, controlWidth);
 
             RectTransform fullscreenRow = CreateRect("FullscreenRow", panel);
-            Place(fullscreenRow, new Vector2(0.5f, 1f), new Vector2(0f, -650f), new Vector2(1200f, 90f));
+            Place(fullscreenRow, new Vector2(0.5f, 1f), new Vector2(0f, -741f), new Vector2(1200f, 90f));
             TextMeshProUGUI fullscreenText = CreateText(fullscreenRow, "Label", "settings.fullscreen", 36f, TextAlignmentOptions.Left, TextLight);
             Place(fullscreenText.rectTransform, Center, new Vector2(labelX, 0f), new Vector2(440f, 80f));
             AutoSize(fullscreenText, 22f, 36f);
-            Button fullscreen = CreateButton(fullscreenRow, "FullscreenButton", "settings.fullscreen.off", new Vector2(controlWidth, 80f), 34f);
+            Button fullscreen = CreateButton(fullscreenRow, "FullscreenButton", "settings.off", new Vector2(controlWidth, 80f), 34f);
             Place((RectTransform)fullscreen.transform, Center, new Vector2(controlX, 0f), new Vector2(controlWidth, 80f));
 
-            Button close = CreateButton(panel, "CloseButton", "common.back", new Vector2(360f, 96f));
-            Place((RectTransform)close.transform, new Vector2(0.5f, 0f), new Vector2(0f, 85f), new Vector2(360f, 96f));
+            Button close = CreateButton(panel, "CloseButton", "common.back", new Vector2(360f, 90f));
+            Place((RectTransform)close.transform, new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(360f, 90f));
             close.image.color = Gold;
 
             var settingsPanel = background.gameObject.AddComponent<SettingsPanel>();
+            SetField(settingsPanel, "_highContrastButton", highContrast);
+            SetField(settingsPanel, "_highContrastLabel", highContrast.GetComponentInChildren<LocalizedText>());
+            SetField(settingsPanel, "_largeUiButton", largeUi);
+            SetField(settingsPanel, "_largeUiLabel", largeUi.GetComponentInChildren<LocalizedText>());
             SetField(settingsPanel, "_languageButtons", languages);
             SetField(settingsPanel, "_musicSlider", music);
             SetField(settingsPanel, "_sfxSlider", sfx);
@@ -695,6 +706,21 @@ namespace Escoba.Editor.Build
             return credits;
         }
 
+        private static void LargeButton(Button button, Vector2 offset)
+        {
+            var scalable = button.gameObject.AddComponent<ScalableButton>();
+            SetField(scalable, "_largeOffset", offset);
+        }
+
+        /// <summary>Fila de Ajustes con un botón de activar/desactivar (texto "Sí"/"No").</summary>
+        private static Button ToggleRow(RectTransform panel, string name, string labelKey, float labelX, float controlX, float y, float width)
+        {
+            SettingsLabel(panel, name + "Label", labelKey, labelX, y);
+            Button button = CreateButton(panel, name + "Button", "settings.off", new Vector2(width, 80f), 34f);
+            Place((RectTransform)button.transform, new Vector2(0.5f, 1f), new Vector2(controlX, y), new Vector2(width, 80f));
+            return button;
+        }
+
         private static void SettingsLabel(RectTransform parent, string name, string key, float x, float y)
         {
             TextMeshProUGUI text = CreateText(parent, name, key, 36f, TextAlignmentOptions.Left, TextLight);
@@ -744,12 +770,24 @@ namespace Escoba.Editor.Build
             var canvasObject = new GameObject("Canvas", typeof(RectTransform)) { layer = LayerMask.NameToLayer("UI") };
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            // El diseño de 1920×1080 + margen cabe siempre entero en la zona segura (SafeCanvasScaler).
             var scaler = canvasObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
             scaler.referenceResolution = ReferenceResolution;
-            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            canvasObject.AddComponent<SafeCanvasScaler>();
             canvasObject.AddComponent<GraphicRaycaster>();
+
+            // Fondo de mesa opcional (Art/Table/table_background.png): cubre toda la pantalla,
+            // recortando lo que sobre; el contenido importante debe ir en el centro 16:9.
+            if (settings != null && settings.TableBackground != null)
+            {
+                Image background = CreateImage(canvasObject.transform, "TableBackground", Color.white, settings.TableBackground);
+                background.rectTransform.anchorMin = background.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                var fitter = background.gameObject.AddComponent<AspectRatioFitter>();
+                fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                Rect spriteRect = settings.TableBackground.rect;
+                fitter.aspectRatio = spriteRect.width / Mathf.Max(1f, spriteRect.height);
+            }
 
             var eventSystem = new GameObject("EventSystem");
             eventSystem.AddComponent<EventSystem>();
@@ -758,6 +796,18 @@ namespace Escoba.Editor.Build
             RectTransform safe = CreateRect("SafeArea", canvasObject.transform);
             Stretch(safe);
             safe.gameObject.AddComponent<SafeArea>();
+
+            // Medidor de rendimiento oculto (5 toques en la versión del menú). Por encima de todo.
+            var perfObject = new GameObject("PerfOverlay", typeof(RectTransform)) { layer = LayerMask.NameToLayer("UI") };
+            perfObject.transform.SetParent(canvasObject.transform, false);
+            var perfText = perfObject.AddComponent<TextMeshProUGUI>();
+            perfText.fontSize = 24f;
+            perfText.alignment = TextAlignmentOptions.Top;
+            perfText.color = new Color(1f, 1f, 0.6f, 0.9f);
+            perfText.raycastTarget = false;
+            perfText.text = string.Empty;
+            Place((RectTransform)perfObject.transform, new Vector2(0.5f, 1f), new Vector2(0f, -22f), new Vector2(1000f, 36f));
+            perfObject.AddComponent<PerfOverlay>();
             return safe;
         }
 

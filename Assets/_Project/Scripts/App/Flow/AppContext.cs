@@ -43,7 +43,7 @@ namespace Escoba.App
 
             Settings = settings != null ? settings : throw new ArgumentNullException(nameof(settings));
             Store = new PlayerPrefsSettingsStore();
-            User = new UserSettings(Store);
+            User = new UserSettings(Store, largeUiDefault: Application.isMobilePlatform);
             Localization.Initialize(LocalizationService.FromTextAssets(settings.Languages, User.Language));
 
             Audio = AudioService.Create(settings.Audio);
@@ -62,6 +62,7 @@ namespace Escoba.App
         private static void ApplyUserSettings()
         {
             Localization.Service?.SetLanguage(User.Language);
+            AccessibilityOptions.Set(User.HighContrast, User.LargeUi);
             if (Audio != null)
             {
                 Audio.SetVolumes(User.MusicVolume, User.SfxVolume);

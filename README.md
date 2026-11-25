@@ -11,6 +11,7 @@ Juego de cartas tradicional **Escoba** con la baraja española, hecho en **Unity
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Ensamblados, flujo de comandos, red |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Hitos y tareas |
 | [docs/CARD_ART_REPLACEMENT.md](docs/CARD_ART_REPLACEMENT.md) | Sustituir la baraja por sprites propios |
+| [docs/ART_GUIDE.md](docs/ART_GUIDE.md) | Tamaños y formatos de todo el arte: cartas, fondo de mesa, icono, arranque, itch.io |
 | [docs/LOCALIZATION.md](docs/LOCALIZATION.md) | Idiomas (es, gl, en), formato JSON y decisiones normativas del gallego |
 | [CHANGELOG.md](CHANGELOG.md) | Historial de cambios |
 | [CLAUDE.md](CLAUDE.md) | Directrices para desarrollar con Claude Code |

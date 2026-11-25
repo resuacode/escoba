@@ -77,6 +77,7 @@ namespace Escoba.Editor.Build
                 SetField(localized, "_key", key);
             }
 
+            rect.gameObject.AddComponent<ScalableText>();
             return text;
         }
 
@@ -192,6 +193,12 @@ namespace Escoba.Editor.Build
                     break;
                 case bool b:
                     property.boolValue = b;
+                    break;
+                case Vector2 v:
+                    property.vector2Value = v;
+                    break;
+                case float f:
+                    property.floatValue = f;
                     break;
                 case Object[] array:
                     property.arraySize = array.Length;

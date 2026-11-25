@@ -9,7 +9,8 @@ namespace Escoba.App
 {
     /// <summary>
     /// Panel "Ajustes" (menú principal y pausa de la partida): idioma, volumen de música y de
-    /// efectos, velocidad de las animaciones y pantalla completa (solo escritorio y web).
+    /// efectos, velocidad de las animaciones, alto contraste, interfaz grande y pantalla
+    /// completa (solo escritorio y web).
     /// Cada cambio se aplica y se guarda al momento en <see cref="UserSettings"/>.
     /// </summary>
     public sealed class SettingsPanel : MonoBehaviour
@@ -22,6 +23,10 @@ namespace Escoba.App
         [SerializeField] private Slider _sfxSlider;
         [Tooltip("Botones Lenta, Normal y Rápida.")]
         [SerializeField] private Button[] _speedButtons = new Button[3];
+        [SerializeField] private Button _highContrastButton;
+        [SerializeField] private LocalizedText _highContrastLabel;
+        [SerializeField] private Button _largeUiButton;
+        [SerializeField] private LocalizedText _largeUiLabel;
         [SerializeField] private GameObject _fullscreenRow;
         [SerializeField] private Button _fullscreenButton;
         [SerializeField] private LocalizedText _fullscreenLabel;
@@ -118,6 +123,9 @@ namespace Escoba.App
                 _speedButtons[i].onClick.AddListener(() => AppContext.User.SetSpeed(speed));
             }
 
+            _highContrastButton.onClick.AddListener(() => AppContext.User.SetHighContrast(!AppContext.User.HighContrast));
+            _largeUiButton.onClick.AddListener(() => AppContext.User.SetLargeUi(!AppContext.User.LargeUi));
+
             bool canFullscreen = !Application.isMobilePlatform;
             _fullscreenRow.SetActive(canFullscreen);
             _fullscreenButton.onClick.AddListener(ToggleFullscreen);
@@ -178,8 +186,15 @@ namespace Escoba.App
                 _speedButtons[i].image.color = i == (int)user.Speed ? _selectedColor : _normalColor;
             }
 
-            _fullscreenLabel.Set(_fullscreen ? "settings.fullscreen.on" : "settings.fullscreen.off");
-            _fullscreenButton.image.color = _fullscreen ? _selectedColor : _normalColor;
+            SetToggle(_highContrastButton, _highContrastLabel, user.HighContrast);
+            SetToggle(_largeUiButton, _largeUiLabel, user.LargeUi);
+            SetToggle(_fullscreenButton, _fullscreenLabel, _fullscreen);
+        }
+
+        private void SetToggle(Button button, LocalizedText label, bool on)
+        {
+            label.Set(on ? "settings.on" : "settings.off");
+            button.image.color = on ? _selectedColor : _normalColor;
         }
 
         private static bool ContainsLanguage(IReadOnlyList<string> available, string code)

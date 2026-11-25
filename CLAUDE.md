@@ -43,7 +43,7 @@ Reglas:
 5. **Información oculta**: las vistas solo reciben lo que su jugador puede ver (vista filtrada del estado). Imprescindible para hot‑seat y Photon.
 6. **Reglas configurables**: `RulesConfig` (POCO en Core) creado desde un `RulesPreset` (ScriptableObject en App). No hay números mágicos de reglas en el código.
 7. **Arte desacoplado**: las cartas se pintan a través de un `CardSkin` (ScriptableObject `(Suit, Rank) → Sprite` + dorso). Ningún script referencia sprites de cartas directamente. Ver [docs/CARD_ART_REPLACEMENT.md](docs/CARD_ART_REPLACEMENT.md).
-8. UI responsive: `CanvasScaler` *Scale With Screen Size*, anclas correctas, safe area en móvil; input vía `EventSystem` + `InputSystemUIInputModule` (ratón y táctil por igual).
+8. UI responsive: `CanvasScaler` en *Constant Pixel Size* gobernado por `SafeCanvasScaler` (el diseño de 1920×1080 más un margen cabe siempre entero en la zona segura), `SafeArea` con margen interior, anclas correctas; input vía `EventSystem` + `InputSystemUIInputModule` (ratón y táctil por igual).
 9. **Escenas y prefab de carta generados por código**: `Escoba/Build/Rebuild All` (`Scripts/Editor/Build/SceneBuilder.cs`, `DefaultAssetsBuilder.cs`). Para cambiar la maquetación, edita el constructor y vuelve a ejecutar el menú; no edites las escenas a mano (se sobrescriben).
 
 ## 5. Flujo de trabajo

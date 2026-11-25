@@ -232,9 +232,10 @@ Lectura: los objetivos se cumplen con margen. El nivel Fácil resulta muy débil
 - Toda animación es saltable con un toque y escala con la velocidad elegida. La lógica no espera a las animaciones (cola de eventos).
 
 ## 13. Accesibilidad
-- Modo daltónico: indicador de palo con icono y color de alto contraste en la esquina de la carta.
-- Tamaño de texto: 100% / 125% / 150%.
+- **Alto contraste (daltonismo)** (implementado, Ajustes): candidatas con borde blanco, seleccionada en naranja intenso (máxima diferencia de luminosidad, distinguible con protanopia, deuteranopia y tritanopia), bordes de 15 px en vez de 8 y cartas no elegibles oscurecidas al 72 %. Los palos ya se distinguen por su forma en la propia carta.
+- **Interfaz grande** (implementado, Ajustes; activada por defecto en móvil): textos hasta 1,2× sin salirse de su caja (autoajuste) y botones Jugar, Deshacer y Menú a 1,25×.
 - Sin información solo por color; todo resaltado tiene contorno además de color.
+- Medidor de rendimiento oculto (5 toques en la versión del menú): FPS y tiempo de decisión de la IA, para pruebas en dispositivos.
 - Animaciones reducidas (respeta velocidad "Rápida" + sin partículas).
 - Objetivos táctiles ≥ 48 dp; jugable con una mano en móvil horizontal.
 

@@ -96,6 +96,24 @@ namespace Escoba.Tests.EditMode
         }
 
         [Test]
+        public void Accessibility_DefaultsDependOnPlatformAndPersist()
+        {
+            var store = new MemoryStore();
+            Assert.That(new UserSettings(store).LargeUi, Is.False, "escritorio: interfaz normal");
+            Assert.That(new UserSettings(store, largeUiDefault: true).LargeUi, Is.True, "móvil: interfaz grande");
+            Assert.That(new UserSettings(store).HighContrast, Is.False);
+            Assert.That(store.KeyCount, Is.Zero);
+
+            var settings = new UserSettings(store, largeUiDefault: true);
+            settings.SetLargeUi(false);
+            settings.SetHighContrast(true);
+
+            var nextSession = new UserSettings(store, largeUiDefault: true);
+            Assert.That(nextSession.LargeUi, Is.False, "la elección del jugador manda sobre el valor por defecto");
+            Assert.That(nextSession.HighContrast, Is.True);
+        }
+
+        [Test]
         public void SpeedLevels_AreOrdered()
         {
             Assert.That(UserSettings.SpeedMultiplierOf(AnimationSpeedLevel.Slow), Is.LessThan(UserSettings.SpeedMultiplierOf(AnimationSpeedLevel.Normal)));

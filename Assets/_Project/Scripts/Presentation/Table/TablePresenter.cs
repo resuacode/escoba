@@ -50,7 +50,10 @@ namespace Escoba.Presentation
         [SerializeField] private float _escobaBannerDuration = 1.4f;
         [SerializeField] private float _goldSevenDuration = 0.8f;
 
+        private const float HoverSoundInterval = 0.06f;
+
         private readonly Dictionary<int, CardView> _faceViews = new Dictionary<int, CardView>();
+        private float _lastHoverSound = -1f;
         private readonly List<Card> _viewerHand = new List<Card>();
         private readonly List<Card> _table = new List<Card>();
         private List<CardView>[] _backs = new List<CardView>[0];
@@ -455,6 +458,7 @@ namespace Escoba.Presentation
                 view.Clicked += OnCardClicked;
                 view.DragStarted += OnCardDragStarted;
                 view.DragEnded += OnCardDragEnded;
+                view.PointerEntered += OnCardPointerEntered;
                 _faceViews.Add(card.Id, view);
             }
 
@@ -846,6 +850,33 @@ namespace Escoba.Presentation
             {
                 _selection.ToggleTableCard(card);
             }
+        }
+
+        /// <summary>
+        /// Sonido sutil al pasar el ratón por una carta de la mano propia (boca arriba). En táctil
+        /// no suena: el "enter" de un toque ya lleva su propio sonido al jugar o seleccionar.
+        /// </summary>
+        private void OnCardPointerEntered(CardView view, PointerEventData eventData)
+        {
+            if (!view.Card.HasValue || !_revealViewerHand || !_viewerHand.Contains(view.Card.Value) || view.IsMoving)
+            {
+                return;
+            }
+
+            if (eventData is UnityEngine.InputSystem.UI.ExtendedPointerEventData extended
+                && extended.pointerType != UnityEngine.InputSystem.UI.UIPointerType.MouseOrPen)
+            {
+                return;
+            }
+
+            float now = Time.unscaledTime;
+            if (now - _lastHoverSound < HoverSoundInterval)
+            {
+                return;
+            }
+
+            _lastHoverSound = now;
+            Sounds.Play(SoundCue.CardHover);
         }
 
         private void OnCardDragStarted(CardView view)

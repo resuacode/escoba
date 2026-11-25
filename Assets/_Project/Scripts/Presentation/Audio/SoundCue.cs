@@ -35,5 +35,8 @@ namespace Escoba.Presentation
 
         /// <summary>Aparece una fila con puntos en el resumen de ronda.</summary>
         ScoreTick = 10,
+
+        /// <summary>El ratón pasa por encima de una carta de la mano (sutil).</summary>
+        CardHover = 11,
     }
 }

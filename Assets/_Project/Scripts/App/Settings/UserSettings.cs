@@ -4,7 +4,7 @@ using System.Globalization;
 namespace Escoba.App
 {
     /// <summary>
-    /// Ajustes del jugador (idioma, volúmenes, velocidad de animación). Los valores por defecto
+    /// Ajustes del jugador (idioma, volúmenes, velocidad de animación, accesibilidad). Los valores por defecto
     /// solo se usan mientras el jugador no cambie nada: cada cambio se guarda al momento en el
     /// <see cref="ISettingsStore"/> y se recupera en la siguiente sesión.
     /// </summary>
@@ -24,7 +24,8 @@ namespace Escoba.App
 
         private readonly ISettingsStore _store;
 
-        public UserSettings(ISettingsStore store)
+        /// <param name="largeUiDefault">Valor por defecto de la interfaz grande (en móvil, activada).</param>
+        public UserSettings(ISettingsStore store, bool largeUiDefault = false)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
             Language = _store.GetString(SettingsKeys.Language, DefaultLanguage);
@@ -32,6 +33,8 @@ namespace Escoba.App
             SfxVolume = ReadVolume(SettingsKeys.SfxVolume, DefaultSfxVolume);
             int speed = _store.GetInt(SettingsKeys.AnimationSpeed, (int)AnimationSpeedLevel.Normal);
             Speed = Enum.IsDefined(typeof(AnimationSpeedLevel), speed) ? (AnimationSpeedLevel)speed : AnimationSpeedLevel.Normal;
+            HighContrast = _store.GetInt(SettingsKeys.HighContrast, 0) == 1;
+            LargeUi = _store.GetInt(SettingsKeys.LargeUi, largeUiDefault ? 1 : 0) == 1;
         }
 
         /// <summary>Se lanza tras cambiar cualquier ajuste.</summary>
@@ -48,6 +51,12 @@ namespace Escoba.App
 
         /// <summary>Velocidad de las animaciones.</summary>
         public AnimationSpeedLevel Speed { get; private set; }
+
+        /// <summary>Alto contraste: resaltados que no dependen solo del color (daltonismo).</summary>
+        public bool HighContrast { get; private set; }
+
+        /// <summary>Interfaz grande: textos y botones de jugada más grandes.</summary>
+        public bool LargeUi { get; private set; }
 
         /// <summary>Multiplicador de velocidad de animaciones y esperas.</summary>
         public float SpeedMultiplier => SpeedMultiplierOf(Speed);
@@ -117,6 +126,32 @@ namespace Escoba.App
 
             Speed = speed;
             _store.SetInt(SettingsKeys.AnimationSpeed, (int)speed);
+            Commit();
+        }
+
+        /// <summary>Activa o desactiva el alto contraste.</summary>
+        public void SetHighContrast(bool enabled)
+        {
+            if (enabled == HighContrast)
+            {
+                return;
+            }
+
+            HighContrast = enabled;
+            _store.SetInt(SettingsKeys.HighContrast, enabled ? 1 : 0);
+            Commit();
+        }
+
+        /// <summary>Activa o desactiva la interfaz grande.</summary>
+        public void SetLargeUi(bool enabled)
+        {
+            if (enabled == LargeUi)
+            {
+                return;
+            }
+
+            LargeUi = enabled;
+            _store.SetInt(SettingsKeys.LargeUi, enabled ? 1 : 0);
             Commit();
         }
 

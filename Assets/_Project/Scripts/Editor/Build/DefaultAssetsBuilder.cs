@@ -24,6 +24,7 @@ namespace Escoba.Editor.Build
         public const string AudioLibraryPath = "Assets/_Project/Data/AudioLibrary.asset";
         public const string SfxFolder = "Assets/_Project/Audio/Sfx";
         public const string MusicFolder = "Assets/_Project/Audio/Music";
+        public const string TableBackgroundPath = "Assets/_Project/Art/Table/table_background.png";
 
         private static readonly string[] LanguageFiles = { "es.json", "gl.json", "en.json" };
 
@@ -41,6 +42,7 @@ namespace Escoba.Editor.Build
             (SoundCue.GameOver, "chips-collide-", 1f),
             (SoundCue.GoldSeven, "chips-collide-", 0.75f),
             (SoundCue.ScoreTick, "chip-lay-", 0.6f),
+            (SoundCue.CardHover, "card-slide-", 0.18f),
         };
 
         [MenuItem("Escoba/Build/Create Default Assets")]
@@ -69,7 +71,8 @@ namespace Escoba.Editor.Build
             AudioLibrary audio = CreateAudioLibrary();
 
             GameSettings settings = LoadOrCreate<GameSettings>(GameSettingsPath);
-            settings.EditorConfigure(skin, presets, languages, audio);
+            Sprite background = AssetDatabase.LoadAssetAtPath<Sprite>(TableBackgroundPath);
+            settings.EditorConfigure(skin, presets, languages, audio, background);
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
             Debug.Log("[Escoba] Assets por defecto creados/actualizados.");

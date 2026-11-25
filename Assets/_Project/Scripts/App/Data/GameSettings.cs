@@ -17,6 +17,8 @@ namespace Escoba.App
         [SerializeField, Min(0)] private int _defaultPresetIndex;
         [SerializeField] private TextAsset[] _languages = new TextAsset[0];
         [SerializeField] private AudioLibrary _audio;
+        [Tooltip("Fondo de mesa a pantalla completa (opcional; sin él se usa el color de tapete).")]
+        [SerializeField] private Sprite _tableBackground;
 
         [Header("Ritmo")]
         [SerializeField, Min(0f)] private float _botThinkSecondsMin = 0.6f;
@@ -38,6 +40,9 @@ namespace Escoba.App
         /// <summary>Efectos de sonido y música.</summary>
         public AudioLibrary Audio => _audio;
 
+        /// <summary>Fondo de mesa (puede ser null).</summary>
+        public Sprite TableBackground => _tableBackground;
+
         /// <summary>Tiempo mínimo que "piensa" la IA.</summary>
         public float BotThinkSecondsMin => _botThinkSecondsMin;
 
@@ -49,8 +54,9 @@ namespace Escoba.App
 
 #if UNITY_EDITOR
         /// <summary>Solo editor: rellena los ajustes (usado al generar los assets por defecto).</summary>
-        public void EditorConfigure(CardSkin skin, RulesPreset[] presets, TextAsset[] languages, AudioLibrary audio)
+        public void EditorConfigure(CardSkin skin, RulesPreset[] presets, TextAsset[] languages, AudioLibrary audio, Sprite tableBackground)
         {
+            _tableBackground = tableBackground;
             _cardSkin = skin;
             _presets = presets;
             _languages = languages;

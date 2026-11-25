@@ -8,5 +8,7 @@ namespace Escoba.App
         public const string MusicVolume = "settings.musicVolume";
         public const string SfxVolume = "settings.sfxVolume";
         public const string AnimationSpeed = "settings.animationSpeed";
+        public const string HighContrast = "settings.highContrast";
+        public const string LargeUi = "settings.largeUi";
     }
 }

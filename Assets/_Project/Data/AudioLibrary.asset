@@ -91,6 +91,17 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 7afd830094d8fa645b81bea3518d4c1c, type: 3}
     - {fileID: 8300000, guid: f10eeba2392b3804e9e167c6130b3e43, type: 3}
     _volume: 0.6
+  - _cue: 11
+    _clips:
+    - {fileID: 8300000, guid: a941e64ba2559f946a46ae977a5a9a09, type: 3}
+    - {fileID: 8300000, guid: 2258b0d3d71e4784c877d85b8d22be5e, type: 3}
+    - {fileID: 8300000, guid: af0c5fb88a245e84ba096127a28b39e2, type: 3}
+    - {fileID: 8300000, guid: fe909e53542f8e64b9f5f2fd626bf672, type: 3}
+    - {fileID: 8300000, guid: 74a55052373817946a4b8689a460fe33, type: 3}
+    - {fileID: 8300000, guid: 88983cf37a011fb4993f4338f8b44fdf, type: 3}
+    - {fileID: 8300000, guid: a8616ef81bd7f5644853e7ed8064ebb5, type: 3}
+    - {fileID: 8300000, guid: 67265b5dfccc73945869b4d955ce6d2e, type: 3}
+    _volume: 0.18
   _menuMusic: {fileID: 8300000, guid: e598b18ead7786b45a51dff121fd262f, type: 3}
   _gameMusic:
   - {fileID: 8300000, guid: b759f647ce2d3d445ae0acb9f8f39e5b, type: 3}
