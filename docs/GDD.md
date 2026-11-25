@@ -164,7 +164,11 @@ Cada fila se revela con una pequeña animación; los empates muestran "empate" e
 Ganador destacado, puntuación final, estadísticas (escobas totales, rondas), botones **Revancha**, **Nueva partida**, **Menú**.
 
 ### 7.6 Ajustes
-Volumen música/efectos, velocidad de animación, idioma, modo daltónico, tamaño de texto, pantalla de pase on/off, mostrar ayudas de captura, skin de cartas, créditos.
+Implementado (M5): idioma (galego por defecto, español, English), volumen de música y de efectos (0-10), velocidad de animación (lenta 0,7×, normal, rápida 1,6×; afecta también a la espera de la IA) y pantalla completa (escritorio y web). Accesible desde el menú principal y desde la pausa de la partida; cada cambio se aplica y se guarda al momento.
+Pendiente: modo daltónico, tamaño de texto, pantalla de pase on/off, mostrar ayudas de captura, skin de cartas, créditos.
+
+### 7.7 Pausa
+El botón "Menú" de la mesa abre la pausa: **Continuar**, **Ajustes** y **Salir al menú**, con el aviso "si sales, se perderá la partida en curso". Mientras está abierta se detiene el tiempo de juego (animaciones y turnos de la IA).
 
 ## 8. Interacción y UX
 **Jugar una carta (ratón y táctil, mismo flujo):**
@@ -205,8 +209,8 @@ Lectura: los objetivos se cumplen con margen. El nivel Fácil resulta muy débil
 - Marcadores de escoba: la carta con la que se hizo escoba se coloca girada 90° en la baza.
 
 ## 11. Audio
-- Efectos: barajar, repartir, colocar carta, capturar, **escoba** (efecto destacado), fin de ronda, victoria/derrota, clic UI.
-- Música: tema ambiental suave en menú y mesa (desactivable). Fuentes CC0 en v1.
+- Efectos (implementados en M5 con *Casino Audio* de Kenney, CC0): barajar, repartir (un sonido por carta), colocar carta, capturar, **escoba** (fichas apilándose), mostrar la mano, fin de ronda, fin de partida y clic UI. Varios clips por efecto, elegidos al azar sin repetir el anterior y con ligera variación de tono.
+- Música (implementada en M5): **menú** con *Lobby Time*; **partida** con una pista al azar entre *Local Forecast – Slower*, *Bossa Antigua*, *Cool Vibes* (Kevin MacLeod, CC-BY 4.0) y *Chill lofi* (CC0), que al terminar enlaza con otra distinta. Fundido cruzado de 2,5 s entre pistas (también al repetir el tema del menú, para evitar el silencio de los MP3). No se corta al cambiar de escena; con el volumen a 0 se detiene. Las pistas CC-BY exigen créditos en el juego y en las páginas de distribución.
 - Mezcla: efectos −6 dB por debajo de la voz/escoba; control de volumen separado.
 
 ## 12. Feedback y animación
@@ -241,7 +245,7 @@ Lectura: los objetivos se cumplen con margen. El nivel Fácil resulta muy débil
 - Nombres de cartas localizados ("Caballo de copas" / "Knight of Cups") con claves `card.rank.*` y `card.suit.*`.
 
 ## 15. Ajustes y persistencia
-- `PlayerPrefs` (WebGL‑compatible) mediante un servicio `ISettingsStore` en App: volumen, idioma, accesibilidad, velocidad, última configuración de partida, skin.
+- `PlayerPrefs` (WebGL‑compatible) mediante un servicio `ISettingsStore` en App: volumen, idioma, accesibilidad, velocidad, última configuración de partida, skin. `UserSettings` solo escribe una preferencia cuando el jugador la cambia; mientras tanto se usan los valores por defecto (gallego, música 50 %, efectos 80 %, velocidad normal).
 - Guardado de partida en curso (M5, opcional): serialización del estado + semilla.
 
 ## 16. Multijugador online (futuro, M6)
@@ -295,4 +299,5 @@ Lectura: los objetivos se cumplen con margen. El nivel Fácil resulta muy débil
 | 0.2.0 | 2026-11-23 | Setenta clásica como única regla de sietes; móvil solo horizontal; recomendación Photon Fusion 2; arte Kenney analizado (pixel art). |
 | 0.3.0 | 2026-11-23 | Captura obligatoria por defecto; Photon Fusion 2 decidido; localización propia con JSON. |
 | 0.4.0 | 2026-11-23 | M2 implementado: mesa 1v1, menú y configuración; gallego añadido como tercer idioma. |
+| 0.6.0 | 2026-11-25 | M5 (1.ª parte): ajustes, pausa, efectos de sonido; gallego como idioma por defecto. |
 | 0.5.0 | 2026-11-23 | M3 implementado: hot-seat con pantalla de pase, 3-4 jugadores, parejas, asientos Humano/IA. Disposición: el que mira abajo, el siguiente a su derecha. Nombres por defecto (nombres personalizados pendientes). |

@@ -4,13 +4,25 @@ using UnityEngine.UI;
 
 namespace Escoba.App
 {
-    /// <summary>Botón "Menú" de la mesa: abandona la partida y vuelve al menú principal.</summary>
+    /// <summary>Botón "Menú" de la mesa: abre la pausa (continuar, ajustes o salir al menú).</summary>
     [RequireComponent(typeof(Button))]
     public sealed class GameMenuButton : MonoBehaviour
     {
+        [SerializeField] private PausePanel _pause;
+
         private void Awake()
         {
-            GetComponent<Button>().onClick.AddListener(() => SceneManager.LoadScene(SceneNames.MainMenu));
+            GetComponent<Button>().onClick.AddListener(() =>
+            {
+                if (_pause != null)
+                {
+                    _pause.Open();
+                }
+                else
+                {
+                    SceneManager.LoadScene(SceneNames.MainMenu);
+                }
+            });
         }
     }
 }

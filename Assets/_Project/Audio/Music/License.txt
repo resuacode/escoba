@@ -1,0 +1,34 @@
+Música de fondo de Escoba
+=========================
+
+Menú (Menu/)
+------------
+lobby-time.mp3
+  "Lobby Time" Kevin MacLeod (incompetech.com)
+  Licensed under Creative Commons: By Attribution 4.0 License
+  http://creativecommons.org/licenses/by/4.0/
+
+Partida (Game/) — suena una al azar en cada partida y enlaza con las demás
+-------------------------------------------------------------------------
+local-forecast-slower.mp3
+  "Local Forecast - Slower" Kevin MacLeod (incompetech.com)
+  Licensed under Creative Commons: By Attribution 4.0 License
+  http://creativecommons.org/licenses/by/4.0/
+
+bossa-antigua.mp3
+  "Bossa Antigua" Kevin MacLeod (incompetech.com)
+  Licensed under Creative Commons: By Attribution 4.0 License
+  http://creativecommons.org/licenses/by/4.0/
+
+cool-vibes.mp3
+  "Cool Vibes" Kevin MacLeod (incompetech.com)
+  Licensed under Creative Commons: By Attribution 4.0 License
+  http://creativecommons.org/licenses/by/4.0/
+
+chill-lofi-loop.ogg
+  "Chill lofi inspired" by omfgdude, made loopable by qubodup
+  https://opengameart.org/content/chill-lofi-inspired-loop-edit
+  CC0 1.0 (dominio público; atribución no obligatoria)
+
+Las pistas CC-BY 4.0 exigen mostrar este crédito en el juego (pantalla de Créditos)
+y en las páginas de distribución (itch.io, GitHub Pages / release).

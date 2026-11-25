@@ -3,6 +3,7 @@ using Escoba.App;
 using Escoba.Core;
 using Escoba.Editor.Build;
 using Escoba.Editor.Cards;
+using Escoba.Presentation;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -27,6 +28,30 @@ namespace Escoba.Tests.EditMode
             Assert.That(settings.Presets.Count, Is.EqualTo(3));
             Assert.That(settings.Presets.All(p => p != null), Is.True);
             Assert.That(settings.Languages.Count(l => l != null), Is.EqualTo(3));
+        }
+
+        [Test]
+        public void AudioLibrary_HasClipsForEverySoundCue()
+        {
+            AudioLibrary audio = Settings().Audio;
+            Assert.That(audio, Is.Not.Null, "Falta AudioLibrary en GameSettings");
+            foreach (SoundCue cue in System.Enum.GetValues(typeof(SoundCue)))
+            {
+                AudioLibrary.CueClips entry = audio.Get(cue);
+                Assert.That(entry, Is.Not.Null, $"sin entrada para {cue}");
+                Assert.That(entry.Clips.Count, Is.GreaterThan(0), $"sin clips para {cue}");
+                Assert.That(entry.Clips.All(c => c != null), Is.True, $"clip nulo en {cue}");
+            }
+        }
+
+        [Test]
+        public void AudioLibrary_HasMenuMusicAndSeveralGameTracks()
+        {
+            AudioLibrary audio = Settings().Audio;
+            Assert.That(audio.MenuMusic, Is.Not.Null, "falta la música del menú (Audio/Music/Menu)");
+            Assert.That(audio.GameMusic.Count, Is.GreaterThanOrEqualTo(2), "la partida alterna varias pistas (Audio/Music/Game)");
+            Assert.That(audio.GameMusic.All(c => c != null), Is.True);
+            Assert.That(audio.GameMusic.Contains(audio.MenuMusic), Is.False, "la música del menú no se repite en partida");
         }
 
         [Test]

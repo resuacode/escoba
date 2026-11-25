@@ -45,10 +45,10 @@ jobs:
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: false
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: Library
           key: Library-tests-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
@@ -78,12 +78,12 @@ jobs:
         if: matrix.targetPlatform == 'Android'
         uses: jlumbroso/free-disk-space@v1.3.1
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           lfs: false
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
@@ -110,7 +110,7 @@ jobs:
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
@@ -123,9 +123,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
 
@@ -157,6 +157,10 @@ jobs:
             echo "- **Web**: también jugable en GitHub Pages."
             echo "- **Windows**: descomprime el zip y ejecuta \`Escoba.exe\`."
             echo "- **Android**: instala el APK (permite instalar apps de orígenes desconocidos)."
+            echo
+            echo "### Créditos"
+            echo "- Cartas y efectos de sonido: Kenney (kenney.nl), CC0."
+            echo "- Música: \"Lobby Time\", \"Local Forecast - Slower\", \"Bossa Antigua\" y \"Cool Vibes\" — Kevin MacLeod (incompetech.com), licencia Creative Commons: By Attribution 4.0 (http://creativecommons.org/licenses/by/4.0/). \"Chill lofi inspired\" — omfgdude / qubodup (OpenGameArt), CC0."
           } >> notes.md
           cat notes.md
 
@@ -184,7 +188,7 @@ jobs:
       group: pages
       cancel-in-progress: false
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: build-WebGL
           path: webgl
@@ -196,12 +200,12 @@ jobs:
           cp -r webgl/Escoba/. site/dev/
           touch site/.nojekyll
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   itch:
     name: Subir a itch.io
@@ -209,7 +213,7 @@ jobs:
     if: vars.ITCH_TARGET != ''
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
 

@@ -5,14 +5,15 @@ namespace Escoba.Editor.Cards
 {
     /// <summary>
     /// Aplica automáticamente los ajustes de importación a las imágenes de cartas
-    /// (<c>Assets/_Project/Art/Cards/</c>). La carpeta <c>Kenney</c> usa el perfil pixel art;
-    /// el resto (p. ej. la baraja española propia) usa el perfil de arte ilustrado.
+    /// (<c>Assets/_Project/Art/Cards/</c>). Las carpetas <c>Kenney</c> y <c>Spanish</c> (la baraja
+    /// española propia, en pixel art) usan el perfil pixel art: filtro Point y sin compresión.
+    /// Cualquier otra carpeta usa el perfil de arte ilustrado.
     /// Ver docs/CARD_ART_REPLACEMENT.md.
     /// </summary>
     public sealed class CardTexturePostprocessor : AssetPostprocessor
     {
         private const string CardsRoot = "Assets/_Project/Art/Cards/";
-        private const string PixelArtRoot = "Assets/_Project/Art/Cards/Kenney/";
+        private static readonly string[] PixelArtRoots = { "Assets/_Project/Art/Cards/Kenney/", "Assets/_Project/Art/Cards/Spanish/" };
         private const int IllustratedMaxSize = 1024;
 
         private void OnPreprocessTexture()
@@ -23,7 +24,7 @@ namespace Escoba.Editor.Cards
             }
 
             var importer = (TextureImporter)assetImporter;
-            bool isPixelArt = assetPath.StartsWith(PixelArtRoot, System.StringComparison.Ordinal);
+            bool isPixelArt = System.Array.Exists(PixelArtRoots, root => assetPath.StartsWith(root, System.StringComparison.Ordinal));
 
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;

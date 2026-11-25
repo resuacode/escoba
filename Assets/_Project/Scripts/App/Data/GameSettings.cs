@@ -16,6 +16,7 @@ namespace Escoba.App
         [SerializeField] private RulesPreset[] _presets = new RulesPreset[0];
         [SerializeField, Min(0)] private int _defaultPresetIndex;
         [SerializeField] private TextAsset[] _languages = new TextAsset[0];
+        [SerializeField] private AudioLibrary _audio;
 
         [Header("Ritmo")]
         [SerializeField, Min(0f)] private float _botThinkSecondsMin = 0.6f;
@@ -34,6 +35,9 @@ namespace Escoba.App
         /// <summary>Ficheros JSON de idioma.</summary>
         public IReadOnlyList<TextAsset> Languages => _languages;
 
+        /// <summary>Efectos de sonido y música.</summary>
+        public AudioLibrary Audio => _audio;
+
         /// <summary>Tiempo mínimo que "piensa" la IA.</summary>
         public float BotThinkSecondsMin => _botThinkSecondsMin;
 
@@ -45,11 +49,12 @@ namespace Escoba.App
 
 #if UNITY_EDITOR
         /// <summary>Solo editor: rellena los ajustes (usado al generar los assets por defecto).</summary>
-        public void EditorConfigure(CardSkin skin, RulesPreset[] presets, TextAsset[] languages)
+        public void EditorConfigure(CardSkin skin, RulesPreset[] presets, TextAsset[] languages, AudioLibrary audio)
         {
             _cardSkin = skin;
             _presets = presets;
             _languages = languages;
+            _audio = audio;
             _defaultPresetIndex = 0;
         }
 #endif

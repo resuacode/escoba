@@ -14,8 +14,9 @@ Necesitas **41 imágenes**: 40 caras + 1 dorso.
 
 | Requisito | Valor recomendado |
 |---|---|
-| Formato | PNG con transparencia (esquinas redondeadas transparentes) |
-| Tamaño | **256 × 384 px** (relación 2:3). Opcional versión HD 512 × 768 |
+| Formato | PNG de 32 bits con transparencia (esquinas redondeadas transparentes) |
+| Tamaño (pixel art) | **60 × 90 px** (relación 2:3), exportado a escala 1×, sin suavizado. En la mesa la carta mide 180 px de alto en la resolución de referencia (1920×1080): cada píxel se ve exactamente como 2×2 (y 4×4 en 4K) |
+| Tamaño (si no fuese pixel art) | 256 × 384 px (relación 2:3); opcional HD 512 × 768 |
 | Todas iguales | Mismo tamaño exacto para las 41 imágenes |
 | Margen | Sin márgenes transparentes extra alrededor de la carta (el borde de la carta toca el borde de la imagen) |
 | Espacio de color | sRGB |
@@ -44,10 +45,11 @@ Lista de comprobación rápida (10 por palo): `01 02 03 04 05 06 07 10 11 12`.
 ## Paso 4 — Ajustes de importación (automáticos)
 No tienes que tocar nada: el postprocesador del proyecto (`CardTexturePostprocessor`) aplica estos ajustes al importar cualquier imagen dentro de `Art/Cards/`. Si quieres comprobarlo, selecciona una imagen y revisa en el Inspector:
 - **Texture Type:** Sprite (2D and UI) · **Sprite Mode:** Single · **Mesh Type:** Full Rect
-- **Generate Mip Maps:** desactivado · **Filter Mode:** Bilinear
-- **Max Size:** 1024 · **Compression:** Automatic (más adelante, overrides por plataforma: Android/iOS ASTC 6×6)
+- **Generate Mip Maps:** desactivado · **Filter Mode:** Point (no filter) · **Compression:** None
 
-> Si cambias algo en el Inspector, se perderá en la siguiente reimportación: los ajustes se cambian en el postprocesador. Si tu arte fuese pixel art, pídeme que tu carpeta use el perfil *Point* como Kenney.
+La carpeta `Spanish/` usa el perfil *pixel art*, igual que Kenney (decisión del 2026-11-25). Cualquier otra carpeta de `Art/Cards/` usa el perfil de arte ilustrado: Bilinear, Max Size 1024, compresión automática.
+
+> Si cambias algo en el Inspector, se perderá en la siguiente reimportación: los ajustes se cambian en el postprocesador.
 
 ## Paso 5 — Genera el CardSkin
 1. Menú **`Escoba → Cards → Generate Card Skin...`**
@@ -93,5 +95,6 @@ Las cartas de Kenney ya están convertidas con este mapeo en `Assets/_Project/Ar
 |---|---|---|
 | Carta rosa o vacía | Falta sprite o nombre mal escrito | Revisa el informe de `Generate Card Skin` |
 | Cartas borrosas | Max Size bajo o compresión agresiva | Sube Max Size a 1024 / usa ASTC 4×4 |
-| Cartas estiradas | Imágenes con distinto tamaño | Exporta todas a 256 × 384 |
+| Cartas estiradas | Imágenes con distinto tamaño | Exporta las 41 con el mismo tamaño (60 × 90) |
+| Píxeles de distinto grosor | El tamaño en pantalla no es múltiplo entero del de la imagen | Mantén 60 × 90 (×2 en la mano). Las manos rivales (110 px de alto) no son múltiplo exacto; si se nota, se ajustan a 90 px (×1) en `TablePresenter` |
 | Bordes blancos | Sin transparencia en esquinas | Exporta PNG con canal alfa |

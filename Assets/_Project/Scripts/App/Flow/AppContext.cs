@@ -5,10 +5,10 @@ using UnityEngine;
 namespace Escoba.App
 {
     /// <summary>
-    /// Servicios de la aplicación compartidos entre escenas (ajustes, preferencias, localización)
-    /// y la partida pendiente de jugar. No contiene estado de partida: ese vive en el motor de la
-    /// escena Game. Se inicializa desde el <see cref="SceneBootstrap"/> de cualquier escena, de modo
-    /// que se puede pulsar Play directamente en Game o MainMenu.
+    /// Servicios de la aplicación compartidos entre escenas (ajustes, preferencias, localización,
+    /// audio) y la partida pendiente de jugar. No contiene estado de partida: ese vive en el motor
+    /// de la escena Game. Se inicializa desde el <see cref="SceneBootstrap"/> de cualquier escena,
+    /// de modo que se puede pulsar Play directamente en Game o MainMenu.
     /// </summary>
     public static class AppContext
     {
@@ -21,8 +21,17 @@ namespace Escoba.App
         /// <summary>Preferencias del jugador.</summary>
         public static ISettingsStore Store { get; private set; }
 
+        /// <summary>Ajustes elegidos por el jugador (idioma, volúmenes, velocidad).</summary>
+        public static UserSettings User { get; private set; }
+
+        /// <summary>Audio (efectos y música).</summary>
+        public static AudioService Audio { get; private set; }
+
         /// <summary>Partida elegida en el menú (null = usar valores por defecto).</summary>
         public static MatchConfig PendingMatch { get; set; }
+
+        /// <summary>Multiplicador de velocidad de animaciones: el del asset por el elegido por el jugador.</summary>
+        public static float AnimationSpeed => (Settings != null ? Settings.AnimationSpeed : 1f) * (User?.SpeedMultiplier ?? 1f);
 
         /// <summary>Inicializa los servicios una sola vez.</summary>
         public static void EnsureInitialized(GameSettings settings)
@@ -34,17 +43,29 @@ namespace Escoba.App
 
             Settings = settings != null ? settings : throw new ArgumentNullException(nameof(settings));
             Store = new PlayerPrefsSettingsStore();
-            string language = Store.GetString(SettingsKeys.Language, DetectLanguage());
-            Localization.Initialize(LocalizationService.FromTextAssets(settings.Languages, language));
+            User = new UserSettings(Store);
+            Localization.Initialize(LocalizationService.FromTextAssets(settings.Languages, User.Language));
+
+            Audio = AudioService.Create(settings.Audio);
+            Sounds.Initialize(Audio);
+            User.Changed += ApplyUserSettings;
+            ApplyUserSettings();
             IsInitialized = true;
         }
 
         /// <summary>Cambia el idioma y lo guarda.</summary>
         public static void SetLanguage(string language)
         {
-            Localization.Service?.SetLanguage(language);
-            Store?.SetString(SettingsKeys.Language, language);
-            Store?.Save();
+            User?.SetLanguage(language);
+        }
+
+        private static void ApplyUserSettings()
+        {
+            Localization.Service?.SetLanguage(User.Language);
+            if (Audio != null)
+            {
+                Audio.SetVolumes(User.MusicVolume, User.SfxVolume);
+            }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -54,18 +75,9 @@ namespace Escoba.App
             IsInitialized = false;
             Settings = null;
             Store = null;
+            User = null;
+            Audio = null;
             PendingMatch = null;
-        }
-
-        private static string DetectLanguage()
-        {
-            switch (Application.systemLanguage)
-            {
-                case SystemLanguage.English:
-                    return "en";
-                default:
-                    return LocalizationService.FallbackLanguage;
-            }
         }
     }
 }

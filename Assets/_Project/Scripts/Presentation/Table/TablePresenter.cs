@@ -175,6 +175,10 @@ namespace Escoba.Presentation
             _hud.SetDeckCount(_deckCount);
             RefreshSeatPanels();
             LayoutAll(false);
+            if (revealHand && _viewerHand.Count > 0)
+            {
+                Sounds.Play(SoundCue.RevealHand);
+            }
         }
 
         /// <summary>Muestra u oculta (boca abajo) la mano del viewer.</summary>
@@ -194,6 +198,7 @@ namespace Escoba.Presentation
             {
                 case RoundStartedEvent e:
                     ClearTable();
+                    Sounds.Play(SoundCue.Shuffle);
                     _dealer = e.Dealer;
                     _hud.SetRound(e.RoundNumber);
                     RefreshSeatPanels();
@@ -225,6 +230,7 @@ namespace Escoba.Presentation
                     break;
                 case RoundScoredEvent _:
                     _turn = -1;
+                    Sounds.Play(SoundCue.RoundEnd);
                     RefreshSeatPanels();
                     break;
             }
@@ -488,6 +494,7 @@ namespace Escoba.Presentation
             }
 
             LayoutSeat(e.Seat, true, DealTime);
+            PlayDealSounds(e.Cards.Count);
             yield return Wait(MoveTime + (DealTime * e.Cards.Count));
         }
 
@@ -503,7 +510,16 @@ namespace Escoba.Presentation
             }
 
             LayoutTable(true, DealTime);
+            PlayDealSounds(cards.Count);
             yield return Wait(MoveTime + (DealTime * cards.Count));
+        }
+
+        private void PlayDealSounds(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Sounds.Play(SoundCue.Deal, i * DealTime);
+            }
         }
 
         private CardView TakeFromHand(int seat, Card card)
@@ -533,6 +549,7 @@ namespace Escoba.Presentation
             _table.Add(card);
             LayoutTable(true);
             LayoutSeat(seat, true);
+            Sounds.Play(SoundCue.PlayCard, MoveTime * 0.8f);
             yield return Wait(MoveTime);
         }
 
@@ -544,6 +561,7 @@ namespace Escoba.Presentation
             // La carta jugada se posa sobre las capturadas, que se resaltan un instante.
             Vector2 target = e.Captured.Select(c => _faceViews[c.Id].Rect.anchoredPosition).Aggregate(Vector2.zero, (a, b) => a + b) / e.Captured.Count;
             played.MoveTo(target + new Vector2(0f, 30f), MoveTime);
+            Sounds.Play(SoundCue.PlayCard, MoveTime * 0.8f);
             foreach (Card card in e.Captured)
             {
                 _faceViews[card.Id].SetHighlight(CardHighlight.Selected);
@@ -559,6 +577,7 @@ namespace Escoba.Presentation
         private IEnumerator SweepToPile(int seat, List<Card> cards, int escobas, string banner)
         {
             Vector2 pile = LayerPosition(_seatPanels[SlotOf(seat)].PileAnchor);
+            Sounds.Play(SoundCue.Capture);
             foreach (Card card in cards)
             {
                 _table.Remove(card);
@@ -578,6 +597,11 @@ namespace Escoba.Presentation
             _escobas[side] += escobas;
             RefreshSeatPanels();
             LayoutTable(true);
+
+            if (escobas > 0)
+            {
+                Sounds.Play(SoundCue.Escoba);
+            }
 
             if (!string.IsNullOrEmpty(banner))
             {

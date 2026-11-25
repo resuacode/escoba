@@ -97,8 +97,45 @@ namespace Escoba.Editor.Build
             label.enableAutoSizing = true;
             label.fontSizeMin = 18f;
             label.fontSizeMax = fontSize;
+            background.gameObject.AddComponent<ButtonClickSound>();
             return button;
         }
+
+        /// <summary>Barra deslizante horizontal (fondo oscuro, relleno y tirador dorados).</summary>
+        public static Slider CreateSlider(Transform parent, string name, Vector2 size)
+        {
+            var resources = new DefaultControls.Resources { standard = RoundedSprite, background = RoundedSprite, knob = KnobSprite };
+            GameObject go = DefaultControls.CreateSlider(resources);
+            go.name = name;
+            foreach (Transform child in go.GetComponentsInChildren<Transform>(true))
+            {
+                child.gameObject.layer = UiLayer;
+            }
+
+            go.transform.SetParent(parent, false);
+            ((RectTransform)go.transform).sizeDelta = size;
+            var slider = go.GetComponent<Slider>();
+            foreach (Image image in go.GetComponentsInChildren<Image>(true))
+            {
+                switch (image.name)
+                {
+                    case "Background":
+                        image.color = new Color(0f, 0f, 0f, 0.45f);
+                        break;
+                    case "Fill":
+                        image.color = Gold;
+                        break;
+                    case "Handle":
+                        image.color = ButtonColor;
+                        ((RectTransform)image.transform).sizeDelta = new Vector2(size.y * 1.4f, 0f);
+                        break;
+                }
+            }
+
+            return slider;
+        }
+
+        public static Sprite KnobSprite => AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
 
         /// <summary>
         /// Campo de texto TMP de una línea. El texto de ayuda (placeholder) lleva

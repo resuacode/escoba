@@ -159,6 +159,7 @@ namespace Escoba.Tests.PlayMode
             "escoba.setup.local.players", "escoba.setup.local.teams", "escoba.setup.local.seats",
             "escoba.setup.ai.players", "escoba.setup.ai.teams", "escoba.setup.ai.seats",
             "escoba.setup.name.0", "escoba.setup.name.1", "escoba.setup.name.2", "escoba.setup.name.3", "escoba.lastPreset",
+            "escoba.language", "escoba.settings.musicVolume", "escoba.settings.sfxVolume", "escoba.settings.animationSpeed",
         };
 
         private Dictionary<string, string> _prefsBackup;
@@ -252,11 +253,76 @@ namespace Escoba.Tests.PlayMode
             Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(SceneNames.MainMenu));
         }
 
+        /// <summary>Pulsa "Menú" (abre la pausa) y después "Salir al menú".</summary>
         private static void ClickMenuButton()
         {
             var menuButton = Object.FindFirstObjectByType<GameMenuButton>();
             Assert.That(menuButton, Is.Not.Null);
             menuButton.GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+            var pause = Object.FindFirstObjectByType<PausePanel>(FindObjectsInactive.Include);
+            Assert.That(pause.IsOpen, Is.True, "el botón Menú abre la pausa");
+            Assert.That(Time.timeScale, Is.EqualTo(0f), "la pausa detiene el tiempo de juego");
+            pause.QuitToMenu();
+        }
+
+        [UnityTest]
+        public IEnumerator Settings_ChangesApplyAndPersist_PauseFreezesAndResumes()
+        {
+            SceneManager.LoadScene(SceneNames.MainMenu);
+            yield return null;
+            yield return null;
+
+            var menu = Object.FindFirstObjectByType<MainMenuController>();
+            menu.OpenSettings();
+            yield return null;
+            var settings = Object.FindFirstObjectByType<SettingsPanel>();
+            Assert.That(settings != null && settings.IsOpen, Is.True, "el panel de Ajustes se abre desde el menú");
+
+            UserSettings user = AppContext.User;
+            string previousLanguage = user.Language;
+            float previousMusic = user.MusicVolume;
+            AnimationSpeedLevel previousSpeed = user.Speed;
+            user.SetMusicVolume(0.5f);
+            Assert.That(AppContext.Audio.CurrentMusic, Is.EqualTo(AppContext.Settings.Audio.MenuMusic), "en el menú suena su tema");
+            user.SetLanguage("en");
+            user.SetSpeed(AnimationSpeedLevel.Fast);
+            user.SetMusicVolume(0f);
+            yield return null;
+            Assert.That(Localization.Service.CurrentLanguage, Is.EqualTo("en"));
+            Assert.That(PlayerPrefs.GetString("escoba.language"), Is.EqualTo("en"), "el idioma se guarda");
+            Assert.That(PlayerPrefs.GetInt("escoba.settings.animationSpeed"), Is.EqualTo((int)AnimationSpeedLevel.Fast));
+            Assert.That(AppContext.Audio.IsMusicPlaying, Is.False, "con volumen 0 la música se detiene");
+            foreach (TMP_Text text in Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None))
+            {
+                Assert.That(text.text, Does.Not.StartWith("["), $"texto sin traducir en {text.name}: {text.text}");
+            }
+
+            settings.Close();
+            Assert.That(settings.IsOpen, Is.False);
+            user.SetMusicVolume(0.5f);
+
+            // En partida: la velocidad elegida se aplica y la pausa congela y reanuda el juego.
+            yield return LoadGame(MatchConfig.Versus(DefaultPreset(), BotDifficulty.Easy), false, 1f, c => { });
+            var table = Object.FindFirstObjectByType<TablePresenter>();
+            Assert.That(table.Speed, Is.EqualTo(AppContext.Settings.AnimationSpeed * UserSettings.SpeedMultiplierOf(AnimationSpeedLevel.Fast)).Within(0.001f));
+            Assert.That(System.Linq.Enumerable.Contains(AppContext.Settings.Audio.GameMusic, AppContext.Audio.CurrentMusic), Is.True,
+                "en partida suena una de las pistas de partida");
+
+            Object.FindFirstObjectByType<GameMenuButton>().GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+            var pause = Object.FindFirstObjectByType<PausePanel>(FindObjectsInactive.Include);
+            Assert.That(pause.IsOpen, Is.True);
+            Assert.That(Time.timeScale, Is.EqualTo(0f));
+            user.SetSpeed(AnimationSpeedLevel.Slow);
+            Assert.That(table.Speed, Is.EqualTo(AppContext.Settings.AnimationSpeed * UserSettings.SpeedMultiplierOf(AnimationSpeedLevel.Slow)).Within(0.001f),
+                "el cambio de velocidad se aplica en la partida en curso");
+            pause.Resume();
+            Assert.That(pause.IsOpen, Is.False);
+            Assert.That(Time.timeScale, Is.EqualTo(1f));
+
+            // Deja la sesión como estaba (las preferencias guardadas las restaura TearDown).
+            user.SetLanguage(previousLanguage);
+            user.SetMusicVolume(previousMusic);
+            user.SetSpeed(previousSpeed);
         }
 
         private static TMP_InputField FindInput(string name)

@@ -31,7 +31,8 @@ Juego de cartas tradicional **Escoba** con la baraja española, hecho en **Unity
 - Toca/clica una carta de tu mano: se resaltan en azul las cartas de la mesa que puede llevarse y se oscurecen las demás. Si solo hay una combinación posible, se marca sola.
 - Toca las cartas de la mesa para marcarlas (la suma aparece como "x/15") y pulsa **Jugar**. **Deshacer** quita la selección.
 - Atajos: doble toque en una carta, o arrastrarla a la mesa, la juega directamente si no hay que elegir combinación.
-- Idiomas: español, galego e English (botón "Idioma" del menú).
+- Idiomas: galego (por defecto), español e English, en **Ajustes**, junto con el volumen de música y efectos, la velocidad de las animaciones y la pantalla completa. Los cambios se recuerdan entre sesiones.
+- Botón **Menú** de la mesa: pausa la partida (continuar, ajustes o salir al menú).
 
 ### Menús de editor
 | Menú | Qué hace |
@@ -90,4 +91,8 @@ docs/                   Documentación
 
 ## Créditos y licencias
 - Cartas temporales: **Kenney — Playing Cards Pack** ([kenney.nl](https://kenney.nl/assets/playing-cards-pack)), licencia **CC0**.
+- Efectos de sonido: **Kenney — Casino Audio** ([kenney.nl](https://kenney.nl/assets/casino-audio)), licencia **CC0**.
+- Música:
+  - "Lobby Time", "Local Forecast - Slower", "Bossa Antigua" y "Cool Vibes" — Kevin MacLeod ([incompetech.com](https://incompetech.com)), licencia [Creative Commons: By Attribution 4.0](http://creativecommons.org/licenses/by/4.0/).
+  - "Chill lofi inspired" — omfgdude, versión en bucle de qubodup ([OpenGameArt](https://opengameart.org/content/chill-lofi-inspired-loop-edit)), licencia **CC0**.
 - MCP for Unity: [CoplayDev/unity-mcp](https://github.com/CoplayDev/unity-mcp) (MIT), solo herramienta de desarrollo.

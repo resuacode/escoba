@@ -70,8 +70,13 @@ Estado: **M0–M4 completados, versión 0.4.0; siguiente M5** · Última actuali
 - [ ] iOS: fuera de CI por ahora
 
 ## M5 — Pulido
-- [ ] Audio, partículas, "¡Escoba!"
-- [ ] Pantalla de ajustes y accesibilidad (idiomas es/gl/en ya disponibles desde M2)
+- [x] Pantalla de ajustes (idioma, volúmenes, velocidad, pantalla completa) con persistencia; gallego por defecto (2026-11-25)
+- [x] Pausa en partida con aviso al salir (2026-11-25)
+- [x] Efectos de sonido (Kenney *Casino Audio*, CC0) (2026-11-25)
+- [x] Música de fondo: tema de menú + 4 pistas de partida al azar con fundido cruzado (2026-11-25)
+- [ ] Animación destacada de "¡Escoba!", partículas y resumen de ronda animado
+- [ ] Accesibilidad: tamaño de texto, modo daltónico, botones táctiles grandes
+- [ ] Créditos (necesarios si la música es CC-BY)
 - [ ] Tutorial y "Cómo se juega"
 - [ ] Builds Windows, Android, iOS, WebGL y optimización
 - [ ] Sustitución por la baraja española propia

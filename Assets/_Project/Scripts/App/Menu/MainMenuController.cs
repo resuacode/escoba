@@ -25,8 +25,8 @@ namespace Escoba.App
         [SerializeField] private Button _playAiButton;
         [SerializeField] private Button _playLocalButton;
         [SerializeField] private Button[] _comingSoonButtons = new Button[0];
-        [SerializeField] private Button _languageButton;
-        [SerializeField] private TMP_Text _languageLabel;
+        [SerializeField] private Button _settingsButton;
+        [SerializeField] private SettingsPanel _settingsPanel;
         [SerializeField] private Button _quitButton;
 
         [Header("Nueva partida")]
@@ -71,7 +71,7 @@ namespace Escoba.App
                 button.interactable = false;
             }
 
-            _languageButton.onClick.AddListener(CycleLanguage);
+            _settingsButton.onClick.AddListener(OpenSettings);
             _quitButton.onClick.AddListener(Application.Quit);
             _quitButton.gameObject.SetActive(Application.platform != RuntimePlatform.WebGLPlayer && !Application.isMobilePlatform);
 
@@ -119,13 +119,30 @@ namespace Escoba.App
             _backButton.onClick.AddListener(CloseSetup);
 
             Localization.Changed += OnLanguageChanged;
-            RefreshLanguageLabel();
+            if (AppContext.Audio != null)
+            {
+                AppContext.Audio.PlayMenuMusic();
+            }
+
+            _settingsPanel.Hide();
             CloseSetup();
         }
 
         private void OnDestroy()
         {
             Localization.Changed -= OnLanguageChanged;
+        }
+
+        /// <summary>Abre el panel de Ajustes sobre el menú.</summary>
+        public void OpenSettings()
+        {
+            _title.SetActive(false);
+            _mainPanel.SetActive(false);
+            _settingsPanel.Open(() =>
+            {
+                _title.SetActive(true);
+                _mainPanel.SetActive(true);
+            });
         }
 
         /// <summary>Abre "Nueva partida" con la última configuración del modo elegido.</summary>
@@ -248,35 +265,9 @@ namespace Escoba.App
 
         private void OnLanguageChanged()
         {
-            RefreshLanguageLabel();
             if (_setupPanel.activeSelf)
             {
                 Refresh();
-            }
-        }
-
-        private void CycleLanguage()
-        {
-            LocalizationService service = Localization.Service;
-            IReadOnlyList<string> languages = service.AvailableLanguages;
-            int current = 0;
-            for (int i = 0; i < languages.Count; i++)
-            {
-                if (languages[i] == service.CurrentLanguage)
-                {
-                    current = i;
-                }
-            }
-
-            AppContext.SetLanguage(languages[(current + 1) % languages.Count]);
-        }
-
-        private void RefreshLanguageLabel()
-        {
-            LocalizationService service = Localization.Service;
-            if (service != null && _languageLabel != null)
-            {
-                _languageLabel.text = $"{service.Get("menu.language")}: {service.GetLanguageName(service.CurrentLanguage)}";
             }
         }
     }

@@ -10,7 +10,8 @@ Idiomas: **español** (`es`, base y respaldo), **gallego** (`gl`) e **inglés** 
 - `LocalizationService` (Presentation) carga los JSON listados en `GameSettings`, resuelve claves con respaldo en español y, si no existe, muestra `[clave]` y avisa en consola (solo en el editor).
 - `LocalizedText` (componente sobre `TMP_Text`) muestra una clave y se actualiza al cambiar de idioma. Desde código: `Localization.Get("clave", args)` y `Localization.GetPlural("game.cards", n)`.
 - Parámetros `{0}`, `{1}` con `string.Format`. Plurales con sufijos `.one` / `.other`.
-- El idioma elegido se guarda en `PlayerPrefs` (`escoba.language`). Por defecto: inglés si el sistema está en inglés; si no, español. Galicia no tiene `SystemLanguage` propio en Unity, así que el gallego se elige en el menú (botón "Idioma").
+- **Idioma por defecto: gallego** (`UserSettings.DefaultLanguage`, decisión del 2026-11-25), sea cual sea el idioma del sistema. El jugador lo cambia en **Ajustes** y la elección se guarda en `PlayerPrefs` (`escoba.language`) solo cuando la cambia.
+- El español sigue siendo el idioma de **respaldo**: si falta una clave en el idioma activo, se muestra en español.
 
 ## Añadir o cambiar textos
 1. Añade la clave en **los tres** JSON (mismo nombre de clave, mismos marcadores `{n}`).

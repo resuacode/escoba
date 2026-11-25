@@ -66,9 +66,14 @@ namespace Escoba.App
         public void SetDebugSpeed(float speed)
         {
             _debugSpeed = Mathf.Max(0.1f, speed);
-            if (AppContext.Settings != null)
+            ApplySpeed();
+        }
+
+        private void ApplySpeed()
+        {
+            if (_table != null)
             {
-                _table.Speed = AppContext.Settings.AnimationSpeed * _debugSpeed;
+                _table.Speed = AppContext.AnimationSpeed * _debugSpeed;
             }
         }
 
@@ -104,7 +109,17 @@ namespace Escoba.App
             _roundSummary.Hide();
             _gameOver.Hide();
             _passScreen.Hide();
-            _table.Speed = settings.AnimationSpeed * _debugSpeed;
+            ApplySpeed();
+            if (AppContext.User != null)
+            {
+                AppContext.User.Changed += ApplySpeed;
+            }
+
+            if (AppContext.Audio != null)
+            {
+                AppContext.Audio.PlayGameMusic();
+            }
+
             _table.Initialize(settings.CardSkin, rules, _seatNames, _localSeat, !_hotSeat);
             _table.UpdateScores(_scoreboardNames, Scores());
             StartCoroutine(RunGame());
@@ -112,6 +127,11 @@ namespace Escoba.App
 
         private void OnDestroy()
         {
+            if (AppContext.User != null)
+            {
+                AppContext.User.Changed -= ApplySpeed;
+            }
+
             if (_controllers == null)
             {
                 return;
@@ -244,6 +264,7 @@ namespace Escoba.App
             bool singleHuman = !_autoPlayAllSeats && _config.HumanCount == 1;
             bool localWon = singleHuman && state.WinnerSide == state.SideOfSeat(_localSeat);
             string winner = _sideNames[state.WinnerSide];
+            Sounds.Play(SoundCue.GameOver);
             string title = localWon
                 ? Localization.Get(_config.Teams ? "gameover.team_you_win" : "gameover.you_win")
                 : Localization.Get("gameover.winner", winner);

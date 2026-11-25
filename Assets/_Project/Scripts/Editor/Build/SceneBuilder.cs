@@ -123,7 +123,7 @@ namespace Escoba.Editor.Build
             Button playLocal = CreateButton(main, "PlayLocalButton", "menu.play_local", new Vector2(680f, 96f));
             Button playOnline = ComingSoonButton(main, "PlayOnlineButton", "menu.play_online");
             Button howTo = ComingSoonButton(main, "HowToPlayButton", "menu.how_to_play");
-            Button language = CreateButton(main, "LanguageButton", null, new Vector2(680f, 96f));
+            Button settingsButton = CreateButton(main, "SettingsButton", "menu.settings", new Vector2(680f, 96f));
             Button quit = CreateButton(main, "QuitButton", "menu.quit", new Vector2(680f, 96f));
 
             TextMeshProUGUI version = CreateText(safe, "Version", null, 24f, TextAlignmentOptions.BottomRight, new Color(1f, 1f, 1f, 0.6f));
@@ -197,14 +197,16 @@ namespace Escoba.Editor.Build
             Place((RectTransform)start.transform, new Vector2(0.5f, 0f), new Vector2(220f, 85f), new Vector2(320f, 96f));
             start.image.color = Gold;
 
+            SettingsPanel settingsPanel = BuildSettingsPanel(safe);
+
             var controller = new GameObject("MainMenuController").AddComponent<MainMenuController>();
             SetField(controller, "_title", title.gameObject);
             SetField(controller, "_mainPanel", main.gameObject);
             SetField(controller, "_playAiButton", playAi);
             SetField(controller, "_playLocalButton", playLocal);
             SetField(controller, "_comingSoonButtons", new Object[] { playOnline, howTo });
-            SetField(controller, "_languageButton", language);
-            SetField(controller, "_languageLabel", language.GetComponentInChildren<TMP_Text>());
+            SetField(controller, "_settingsButton", settingsButton);
+            SetField(controller, "_settingsPanel", settingsPanel);
             SetField(controller, "_quitButton", quit);
             SetField(controller, "_setupPanel", setup.gameObject);
             SetField(controller, "_playerCountButtons", counts);
@@ -296,7 +298,7 @@ namespace Escoba.Editor.Build
             play.image.color = Gold;
             Button menu = CreateButton(safe, "MenuButton", "game.menu", new Vector2(180f, 70f), 32f);
             Place((RectTransform)menu.transform, new Vector2(0f, 1f), new Vector2(110f, -55f), new Vector2(180f, 70f));
-            menu.gameObject.AddComponent<GameMenuButton>();
+            var menuButton = menu.gameObject.AddComponent<GameMenuButton>();
 
             // Aviso grande
             Image bannerBackground = CreateImage(safe, "Banner", new Color(0f, 0f, 0f, 0.6f), RoundedSprite);
@@ -332,6 +334,8 @@ namespace Escoba.Editor.Build
             RoundSummaryPanel summary = BuildRoundSummary(safe);
             GameOverPanel gameOver = BuildGameOver(safe);
             PassScreenPanel passScreen = BuildPassScreen(safe);
+            PausePanel pause = BuildPausePanel(safe);
+            SetField(menuButton, "_pause", pause);
 
             // Mesa y controlador
             var table = new GameObject("Table").AddComponent<TablePresenter>();
@@ -497,6 +501,104 @@ namespace Escoba.Editor.Build
             SetField(pass, "_confirmLabel", confirm.GetComponentInChildren<LocalizedText>());
             overlay.gameObject.SetActive(false);
             return pass;
+        }
+
+        private static PausePanel BuildPausePanel(RectTransform parent)
+        {
+            Image overlay = CreateImage(parent, "Pause", OverlayColor, null, true);
+            Stretch(overlay.rectTransform);
+
+            Image content = CreateImage(overlay.transform, "Content", PanelColor, RoundedSprite, true);
+            Place(content.rectTransform, Center, Vector2.zero, new Vector2(900f, 680f));
+            Label(content.rectTransform, "Title", "pause.title", 64f, new Vector2(0f, -80f), new Vector2(800f, 90f), Gold);
+
+            Button resume = CreateButton(content.transform, "ResumeButton", "pause.resume", new Vector2(560f, 96f));
+            Place((RectTransform)resume.transform, Center, new Vector2(0f, 110f), new Vector2(560f, 96f));
+            resume.image.color = Gold;
+            Button settings = CreateButton(content.transform, "SettingsButton", "menu.settings", new Vector2(560f, 96f));
+            Place((RectTransform)settings.transform, Center, new Vector2(0f, -5f), new Vector2(560f, 96f));
+            Button quit = CreateButton(content.transform, "QuitButton", "pause.quit", new Vector2(560f, 96f));
+            Place((RectTransform)quit.transform, Center, new Vector2(0f, -120f), new Vector2(560f, 96f));
+
+            TextMeshProUGUI warning = CreateText(content.transform, "Warning", "pause.quit_warning", 28f, TextAlignmentOptions.Center, TextLight);
+            Place(warning.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(800f, 50f));
+
+            SettingsPanel settingsPanel = BuildSettingsPanel((RectTransform)overlay.transform);
+
+            var pause = overlay.gameObject.AddComponent<PausePanel>();
+            SetField(pause, "_content", content.gameObject);
+            SetField(pause, "_resumeButton", resume);
+            SetField(pause, "_settingsButton", settings);
+            SetField(pause, "_quitButton", quit);
+            SetField(pause, "_settings", settingsPanel);
+            overlay.gameObject.SetActive(false);
+            return pause;
+        }
+
+        /// <summary>Panel de Ajustes (idioma, volúmenes, velocidad, pantalla completa). Se crea oculto.</summary>
+        private static SettingsPanel BuildSettingsPanel(RectTransform parent)
+        {
+            Image background = CreateImage(parent, "SettingsPanel", PanelColor, RoundedSprite, true);
+            RectTransform panel = background.rectTransform;
+            Place(panel, Center, Vector2.zero, new Vector2(1300f, 940f));
+            Label(panel, "Title", "menu.settings", 60f, new Vector2(0f, -60f), new Vector2(1000f, 80f), Gold);
+
+            const float labelX = -380f;
+            const float controlX = 200f;
+            const float controlWidth = 700f;
+
+            SettingsLabel(panel, "LanguageLabel", "menu.language", labelX, -180f);
+            Button[] languages = ButtonRow(panel, "Language", new[] { (string)null, null, null }, new Vector2(controlX, -180f), new Vector2(220f, 80f), 20f);
+
+            SettingsLabel(panel, "MusicLabel", "settings.music", labelX, -300f);
+            Slider music = CreateSlider(panel, "MusicSlider", new Vector2(controlWidth, 40f));
+            Place((RectTransform)music.transform, new Vector2(0.5f, 1f), new Vector2(controlX, -300f), new Vector2(controlWidth, 40f));
+
+            SettingsLabel(panel, "SfxLabel", "settings.sfx", labelX, -410f);
+            Slider sfx = CreateSlider(panel, "SfxSlider", new Vector2(controlWidth, 40f));
+            Place((RectTransform)sfx.transform, new Vector2(0.5f, 1f), new Vector2(controlX, -410f), new Vector2(controlWidth, 40f));
+
+            SettingsLabel(panel, "SpeedLabel", "settings.speed", labelX, -530f);
+            Button[] speeds = ButtonRow(panel, "Speed", new[] { "settings.speed.slow", "settings.speed.normal", "settings.speed.fast" },
+                new Vector2(controlX, -530f), new Vector2(220f, 80f), 20f);
+
+            RectTransform fullscreenRow = CreateRect("FullscreenRow", panel);
+            Place(fullscreenRow, new Vector2(0.5f, 1f), new Vector2(0f, -650f), new Vector2(1200f, 90f));
+            TextMeshProUGUI fullscreenText = CreateText(fullscreenRow, "Label", "settings.fullscreen", 36f, TextAlignmentOptions.Left, TextLight);
+            Place(fullscreenText.rectTransform, Center, new Vector2(labelX, 0f), new Vector2(440f, 80f));
+            AutoSize(fullscreenText, 22f, 36f);
+            Button fullscreen = CreateButton(fullscreenRow, "FullscreenButton", "settings.fullscreen.off", new Vector2(controlWidth, 80f), 34f);
+            Place((RectTransform)fullscreen.transform, Center, new Vector2(controlX, 0f), new Vector2(controlWidth, 80f));
+
+            Button close = CreateButton(panel, "CloseButton", "common.back", new Vector2(360f, 96f));
+            Place((RectTransform)close.transform, new Vector2(0.5f, 0f), new Vector2(0f, 85f), new Vector2(360f, 96f));
+            close.image.color = Gold;
+
+            var settingsPanel = background.gameObject.AddComponent<SettingsPanel>();
+            SetField(settingsPanel, "_languageButtons", languages);
+            SetField(settingsPanel, "_musicSlider", music);
+            SetField(settingsPanel, "_sfxSlider", sfx);
+            SetField(settingsPanel, "_speedButtons", speeds);
+            SetField(settingsPanel, "_fullscreenRow", fullscreenRow.gameObject);
+            SetField(settingsPanel, "_fullscreenButton", fullscreen);
+            SetField(settingsPanel, "_fullscreenLabel", fullscreen.GetComponentInChildren<LocalizedText>());
+            SetField(settingsPanel, "_closeButton", close);
+            background.gameObject.SetActive(false);
+            return settingsPanel;
+        }
+
+        private static void SettingsLabel(RectTransform parent, string name, string key, float x, float y)
+        {
+            TextMeshProUGUI text = CreateText(parent, name, key, 36f, TextAlignmentOptions.Left, TextLight);
+            Place(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(x, y), new Vector2(440f, 80f));
+            AutoSize(text, 22f, 36f);
+        }
+
+        private static void AutoSize(TextMeshProUGUI text, float min, float max)
+        {
+            text.enableAutoSizing = true;
+            text.fontSizeMin = min;
+            text.fontSizeMax = max;
         }
 
         // ---------------------------------------------------------------- Utilidades

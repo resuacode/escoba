@@ -3,8 +3,20 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
-### Added
+### Added — M5: ajustes, pausa y sonido
+- Panel **Ajustes** (menú principal y pausa): idioma (galego, español, English), volumen de música y de efectos, velocidad de las animaciones (lenta, normal, rápida) y pantalla completa (escritorio y web). Cada cambio se aplica al momento y se guarda; sin cambios no se escribe ninguna preferencia (`UserSettings`, `SettingsPanel`).
+- **Pausa** en la partida (botón "Menú"): continuar, ajustes o salir al menú avisando de que se pierde la partida. Mientras está abierta se detiene el juego (`PausePanel`).
+- **Efectos de sonido** con el pack *Casino Audio* de Kenney (CC0): barajar, repartir, jugar carta, llevarse cartas, escoba, mostrar la mano, fin de ronda, fin de partida y clic en los botones (`AudioService`, `AudioLibrary`, `SoundCue`, `Sounds`, `ButtonClickSound`). Preparado para música de fondo en bucle (`Assets/_Project/Audio/Music/`).
+- **Música de fondo**: *Lobby Time* en el menú y, en cada partida, una pista al azar entre *Local Forecast – Slower*, *Bossa Antigua*, *Cool Vibes* (Kevin MacLeod, CC-BY 4.0) y *Chill lofi* (omfgdude/qubodup, CC0), que enlaza con otra distinta al terminar. Cambios de pista con fundido cruzado (sin silencios al repetir) que sigue funcionando en pausa. Créditos en `Audio/Music/License.txt`, README y notas de cada release.
+- `AudioImportPostprocessor`: importación automática del audio (música Vorbis 0,4 comprimida en memoria y carga en segundo plano; efectos mono descomprimidos al cargar).
+- Tests: `UserSettingsTests` y `AudioLibrary_HasClipsForEverySoundCue` (EditMode); `Settings_ChangesApplyAndPersist_PauseFreezesAndResumes` (PlayMode). Total: 186 EditMode + 9 PlayMode.
 - Workflow manual `itch.yml` (*itch.io (manual)*): sube a itch.io los ficheros de una release ya publicada, sin recompilar.
+
+### Changed
+- **Idioma por defecto: gallego** (antes español, o inglés si el sistema estaba en inglés). La preferencia del jugador se sigue recordando entre sesiones.
+- El botón "Idioma" del menú principal pasa a ser **Ajustes**.
+- La carpeta `Art/Cards/Spanish/` se importa con el perfil *pixel art* (filtro Point, sin compresión), como Kenney.
+- Acciones de GitHub actualizadas a sus versiones con Node 24 (`checkout@v7`, `cache@v6`, `upload-artifact@v7`, `download-artifact@v8`, `configure-pages@v6`, `upload-pages-artifact@v5`, `deploy-pages@v5`): sin avisos de Node 20 obsoleto.
 
 ### Fixed
 - `release.yml`: butler se descarga de `broth.itch.zone` (el dominio `broth.itch.ovh` ya no resuelve y hacía fallar el paso de itch.io de la `v0.4.0`).
