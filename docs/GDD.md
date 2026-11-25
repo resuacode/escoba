@@ -167,8 +167,12 @@ Ganador destacado, puntuación final, estadísticas (escobas totales, rondas), b
 Implementado (M5): idioma (galego por defecto, español, English), volumen de música y de efectos (0-10), velocidad de animación (lenta 0,7×, normal, rápida 1,6×; afecta también a la espera de la IA) y pantalla completa (escritorio y web). Accesible desde el menú principal y desde la pausa de la partida; cada cambio se aplica y se guarda al momento.
 Pendiente: modo daltónico, tamaño de texto, pantalla de pase on/off, mostrar ayudas de captura, skin de cartas, créditos.
 
+### 7.8 Cómo se juega y créditos
+**Cómo se juega** (menú principal y pausa): 10 páginas con título, texto y, cuando aplica, un ejemplo dibujado con la baraja activa ("Tu carta" + "En la mesa"): objetivo, valor de las cartas, tu turno (5 + 7 + 3), captura obligatoria con elección (rey + 5 o rey + 2 + 3), escoba (6 + 4 + 5), fin de ronda, puntos, setenta, jugadores y parejas, controles. Navegación Anterior / Volver / Siguiente con indicador "n / 10". Describe las reglas por defecto (`escoba-rules`).
+**Créditos** (gl: *Autoría*): botón pequeño abajo a la izquierda del menú principal; desarrollo, cartas y sonidos (Kenney, CC0) y música (Kevin MacLeod, CC-BY 4.0, con el texto de atribución exigido; lofi CC0).
+
 ### 7.7 Pausa
-El botón "Menú" de la mesa abre la pausa: **Continuar**, **Ajustes** y **Salir al menú**, con el aviso "si sales, se perderá la partida en curso". Mientras está abierta se detiene el tiempo de juego (animaciones y turnos de la IA).
+El botón "Menú" de la mesa abre la pausa: **Continuar**, **Cómo se juega**, **Ajustes** y **Salir al menú**, con el aviso "si sales, se perderá la partida en curso". Mientras está abierta se detiene el tiempo de juego (animaciones y turnos de la IA).
 
 ## 8. Interacción y UX
 **Jugar una carta (ratón y táctil, mismo flujo):**

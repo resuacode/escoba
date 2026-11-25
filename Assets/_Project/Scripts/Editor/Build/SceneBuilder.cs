@@ -122,13 +122,16 @@ namespace Escoba.Editor.Build
             Button playAi = CreateButton(main, "PlayAiButton", "menu.play_ai", new Vector2(680f, 96f));
             Button playLocal = CreateButton(main, "PlayLocalButton", "menu.play_local", new Vector2(680f, 96f));
             Button playOnline = ComingSoonButton(main, "PlayOnlineButton", "menu.play_online");
-            Button howTo = ComingSoonButton(main, "HowToPlayButton", "menu.how_to_play");
+            Button howTo = CreateButton(main, "HowToPlayButton", "menu.how_to_play", new Vector2(680f, 96f));
             Button settingsButton = CreateButton(main, "SettingsButton", "menu.settings", new Vector2(680f, 96f));
             Button quit = CreateButton(main, "QuitButton", "menu.quit", new Vector2(680f, 96f));
 
             TextMeshProUGUI version = CreateText(safe, "Version", null, 24f, TextAlignmentOptions.BottomRight, new Color(1f, 1f, 1f, 0.6f));
             Place(version.rectTransform, new Vector2(1f, 0f), new Vector2(-220f, 30f), new Vector2(420f, 40f));
             version.gameObject.AddComponent<VersionLabel>();
+
+            Button credits = CreateButton(safe, "CreditsButton", "menu.credits", new Vector2(240f, 64f), 30f);
+            Place((RectTransform)credits.transform, new Vector2(0f, 0f), new Vector2(150f, 62f), new Vector2(240f, 64f));
 
             // Nueva partida (dos columnas)
             Image setupBackground = CreateImage(safe, "SetupPanel", PanelColor, RoundedSprite, true);
@@ -198,13 +201,19 @@ namespace Escoba.Editor.Build
             start.image.color = Gold;
 
             SettingsPanel settingsPanel = BuildSettingsPanel(safe);
+            HowToPlayPanel howToPlayPanel = BuildHowToPlayPanel(safe);
+            CreditsPanel creditsPanel = BuildCreditsPanel(safe);
 
             var controller = new GameObject("MainMenuController").AddComponent<MainMenuController>();
             SetField(controller, "_title", title.gameObject);
             SetField(controller, "_mainPanel", main.gameObject);
             SetField(controller, "_playAiButton", playAi);
             SetField(controller, "_playLocalButton", playLocal);
-            SetField(controller, "_comingSoonButtons", new Object[] { playOnline, howTo });
+            SetField(controller, "_comingSoonButtons", new Object[] { playOnline });
+            SetField(controller, "_howToPlayButton", howTo);
+            SetField(controller, "_howToPlayPanel", howToPlayPanel);
+            SetField(controller, "_creditsButton", credits);
+            SetField(controller, "_creditsPanel", creditsPanel);
             SetField(controller, "_settingsButton", settingsButton);
             SetField(controller, "_settingsPanel", settingsPanel);
             SetField(controller, "_quitButton", quit);
@@ -509,21 +518,24 @@ namespace Escoba.Editor.Build
             Stretch(overlay.rectTransform);
 
             Image content = CreateImage(overlay.transform, "Content", PanelColor, RoundedSprite, true);
-            Place(content.rectTransform, Center, Vector2.zero, new Vector2(900f, 680f));
+            Place(content.rectTransform, Center, Vector2.zero, new Vector2(900f, 800f));
             Label(content.rectTransform, "Title", "pause.title", 64f, new Vector2(0f, -80f), new Vector2(800f, 90f), Gold);
 
             Button resume = CreateButton(content.transform, "ResumeButton", "pause.resume", new Vector2(560f, 96f));
-            Place((RectTransform)resume.transform, Center, new Vector2(0f, 110f), new Vector2(560f, 96f));
+            Place((RectTransform)resume.transform, Center, new Vector2(0f, 175f), new Vector2(560f, 96f));
             resume.image.color = Gold;
+            Button howTo = CreateButton(content.transform, "HowToPlayButton", "menu.how_to_play", new Vector2(560f, 96f));
+            Place((RectTransform)howTo.transform, Center, new Vector2(0f, 60f), new Vector2(560f, 96f));
             Button settings = CreateButton(content.transform, "SettingsButton", "menu.settings", new Vector2(560f, 96f));
-            Place((RectTransform)settings.transform, Center, new Vector2(0f, -5f), new Vector2(560f, 96f));
+            Place((RectTransform)settings.transform, Center, new Vector2(0f, -55f), new Vector2(560f, 96f));
             Button quit = CreateButton(content.transform, "QuitButton", "pause.quit", new Vector2(560f, 96f));
-            Place((RectTransform)quit.transform, Center, new Vector2(0f, -120f), new Vector2(560f, 96f));
+            Place((RectTransform)quit.transform, Center, new Vector2(0f, -170f), new Vector2(560f, 96f));
 
             TextMeshProUGUI warning = CreateText(content.transform, "Warning", "pause.quit_warning", 28f, TextAlignmentOptions.Center, TextLight);
             Place(warning.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(800f, 50f));
 
             SettingsPanel settingsPanel = BuildSettingsPanel((RectTransform)overlay.transform);
+            HowToPlayPanel howToPlayPanel = BuildHowToPlayPanel((RectTransform)overlay.transform);
 
             var pause = overlay.gameObject.AddComponent<PausePanel>();
             SetField(pause, "_content", content.gameObject);
@@ -531,6 +543,8 @@ namespace Escoba.Editor.Build
             SetField(pause, "_settingsButton", settings);
             SetField(pause, "_quitButton", quit);
             SetField(pause, "_settings", settingsPanel);
+            SetField(pause, "_howToPlayButton", howTo);
+            SetField(pause, "_howToPlay", howToPlayPanel);
             overlay.gameObject.SetActive(false);
             return pause;
         }
@@ -585,6 +599,89 @@ namespace Escoba.Editor.Build
             SetField(settingsPanel, "_closeButton", close);
             background.gameObject.SetActive(false);
             return settingsPanel;
+        }
+
+        /// <summary>Panel "Cómo se juega": título, texto, ejemplo con cartas y navegación. Se crea oculto.</summary>
+        private static HowToPlayPanel BuildHowToPlayPanel(RectTransform parent)
+        {
+            Image background = CreateImage(parent, "HowToPlayPanel", PanelColor, RoundedSprite, true);
+            RectTransform panel = background.rectTransform;
+            Place(panel, Center, Vector2.zero, new Vector2(1640f, 980f));
+
+            TextMeshProUGUI title = Label(panel, "Title", "howto.goal.title", 58f, new Vector2(0f, -65f), new Vector2(1400f, 80f), Gold);
+            TextMeshProUGUI body = CreateText(panel, "Body", "howto.goal.body", 36f, TextAlignmentOptions.Top, TextLight);
+            Place(body.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -235f), new Vector2(1440f, 230f));
+            AutoSize(body, 24f, 36f);
+
+            RectTransform example = CreateRect("Example", panel);
+            Place(example, Center, new Vector2(0f, -70f), new Vector2(1400f, 300f));
+            var slots = new Object[6];
+            for (int i = 0; i < slots.Length; i++)
+            {
+                Image slot = CreateImage(example, $"Card{i}", Color.white);
+                Place(slot.rectTransform, Center, Vector2.zero, new Vector2(154f, 220f));
+                slot.preserveAspect = true;
+                slots[i] = slot;
+            }
+
+            TextMeshProUGUI playedLabel = CreateText(example, "PlayedLabel", "howto.your_card", 30f, TextAlignmentOptions.Center, Gold);
+            Place(playedLabel.rectTransform, Center, new Vector2(-200f, 145f), new Vector2(360f, 44f));
+            TextMeshProUGUI tableLabel = CreateText(example, "TableLabel", "howto.on_table", 30f, TextAlignmentOptions.Center, Gold);
+            Place(tableLabel.rectTransform, Center, new Vector2(200f, 145f), new Vector2(360f, 44f));
+
+            TextMeshProUGUI caption = CreateText(panel, "Caption", "howto.goal.caption", 34f, TextAlignmentOptions.Center, Gold);
+            Place(caption.rectTransform, Center, new Vector2(0f, -275f), new Vector2(1440f, 70f));
+            AutoSize(caption, 22f, 34f);
+
+            TextMeshProUGUI page = CreateText(panel, "Page", "howto.page", 28f, TextAlignmentOptions.Center, TextLight);
+            Place(page.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 85f), new Vector2(240f, 50f));
+
+            Button previous = CreateButton(panel, "PreviousButton", "howto.previous", new Vector2(320f, 96f));
+            Place((RectTransform)previous.transform, new Vector2(0.5f, 0f), new Vector2(-560f, 85f), new Vector2(320f, 96f));
+            Button close = CreateButton(panel, "CloseButton", "common.back", new Vector2(320f, 96f));
+            Place((RectTransform)close.transform, new Vector2(0.5f, 0f), new Vector2(-200f, 85f), new Vector2(320f, 96f));
+            Button next = CreateButton(panel, "NextButton", "howto.next", new Vector2(320f, 96f));
+            Place((RectTransform)next.transform, new Vector2(0.5f, 0f), new Vector2(560f, 85f), new Vector2(320f, 96f));
+            next.image.color = Gold;
+            Place(page.rectTransform, new Vector2(0.5f, 0f), new Vector2(180f, 85f), new Vector2(240f, 50f));
+
+            var howTo = background.gameObject.AddComponent<HowToPlayPanel>();
+            SetField(howTo, "_title", title.GetComponent<LocalizedText>());
+            SetField(howTo, "_body", body.GetComponent<LocalizedText>());
+            SetField(howTo, "_caption", caption.GetComponent<LocalizedText>());
+            SetField(howTo, "_pageLabel", page.GetComponent<LocalizedText>());
+            SetField(howTo, "_exampleArea", example);
+            SetField(howTo, "_cardSlots", slots);
+            SetField(howTo, "_playedLabel", playedLabel.rectTransform);
+            SetField(howTo, "_tableLabel", tableLabel.rectTransform);
+            SetField(howTo, "_previousButton", previous);
+            SetField(howTo, "_nextButton", next);
+            SetField(howTo, "_closeButton", close);
+            background.gameObject.SetActive(false);
+            return howTo;
+        }
+
+        /// <summary>Panel de créditos (texto <c>credits.body</c>). Se crea oculto.</summary>
+        private static CreditsPanel BuildCreditsPanel(RectTransform parent)
+        {
+            Image background = CreateImage(parent, "CreditsPanel", PanelColor, RoundedSprite, true);
+            RectTransform panel = background.rectTransform;
+            Place(panel, Center, Vector2.zero, new Vector2(1640f, 980f));
+            Label(panel, "Title", "menu.credits", 58f, new Vector2(0f, -65f), new Vector2(1400f, 80f), Gold);
+
+            TextMeshProUGUI body = CreateText(panel, "Body", "credits.body", 30f, TextAlignmentOptions.Top, TextLight);
+            Place(body.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -490f), new Vector2(1480f, 700f));
+            AutoSize(body, 18f, 30f);
+            body.lineSpacing = 6f;
+
+            Button close = CreateButton(panel, "CloseButton", "common.back", new Vector2(360f, 96f));
+            Place((RectTransform)close.transform, new Vector2(0.5f, 0f), new Vector2(0f, 85f), new Vector2(360f, 96f));
+            close.image.color = Gold;
+
+            var credits = background.gameObject.AddComponent<CreditsPanel>();
+            SetField(credits, "_closeButton", close);
+            background.gameObject.SetActive(false);
+            return credits;
         }
 
         private static void SettingsLabel(RectTransform parent, string name, string key, float x, float y)

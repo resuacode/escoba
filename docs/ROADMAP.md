@@ -77,7 +77,8 @@ Estado: **M0–M4 completados, versión 0.4.0; siguiente M5** · Última actuali
 - [ ] Animación destacada de "¡Escoba!", partículas y resumen de ronda animado
 - [ ] Accesibilidad: tamaño de texto, modo daltónico, botones táctiles grandes
 - [ ] Créditos (necesarios si la música es CC-BY)
-- [ ] Tutorial y "Cómo se juega"
+- [x] "Cómo se juega" (10 páginas con ejemplos) y Créditos/Autoría (2026-11-25)
+- [ ] Tutorial guiado interactivo (se valorará tras probar "Cómo se juega")
 - [ ] Builds Windows, Android, iOS, WebGL y optimización
 - [ ] Sustitución por la baraja española propia
 

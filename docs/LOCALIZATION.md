@@ -44,6 +44,13 @@ Norma de referencia: **Normas ortográficas e morfolóxicas do idioma galego (RA
 | Mostrar | **amosar** (preferente; *mostrar* también es correcto): "amosar a miña man" | DRAG *amosar*, *mostrar* |
 | Nadie | **ninguén** | DRAG *ninguén* |
 | Pasa el dispositivo | **"Pásalle o dispositivo a {0}"** (duplicación del CI con *lle*, natural en gallego) | criterio gramatical (revisión M3) |
+| Créditos de una obra | **Autoría** ("Créditos" no tiene en el DRAG la acepción de títulos de crédito; *crédito* = préstamo, confianza, unidad lectiva) | DRAG *crédito* (consulta 2026-11-25) |
+| Frente a frente | **cara a cara** ("enfronte" no figura en el DRAG) | DRAG (consulta 2026-11-25) |
+| Siete de oros | **sete de ouros** (no se usa "velo": no figura en el DRAG) | DRAG (consulta 2026-11-25) |
+| Vacía (mesa) | **baleira** | DRAG *baleiro* |
+| Pulsar un botón | **premer** (acepción informática) | DRAG *premer* |
+| Atajo | **atallo** ("procedemento para facer algo en menos tempo") | DRAG *atallo* |
+| Desarrollo / sonido / herramienta | **desenvolvemento**, **son**, **ferramenta** | DRAG |
 | Pretéritos | **xogou, levou, deixou, fixo, gañou** (sin tiempos compuestos: "Ha ganado" → "Gañou") | formas normativas |
 
 `LocalizationTests.Galician_FollowsRagNormDecisions` vigila estas decisiones y la ausencia de grafías portuguesas (ç, ã, õ, lh...).

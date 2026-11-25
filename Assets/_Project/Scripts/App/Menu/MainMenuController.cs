@@ -27,6 +27,10 @@ namespace Escoba.App
         [SerializeField] private Button[] _comingSoonButtons = new Button[0];
         [SerializeField] private Button _settingsButton;
         [SerializeField] private SettingsPanel _settingsPanel;
+        [SerializeField] private Button _howToPlayButton;
+        [SerializeField] private HowToPlayPanel _howToPlayPanel;
+        [SerializeField] private Button _creditsButton;
+        [SerializeField] private CreditsPanel _creditsPanel;
         [SerializeField] private Button _quitButton;
 
         [Header("Nueva partida")]
@@ -72,6 +76,8 @@ namespace Escoba.App
             }
 
             _settingsButton.onClick.AddListener(OpenSettings);
+            _howToPlayButton.onClick.AddListener(OpenHowToPlay);
+            _creditsButton.onClick.AddListener(OpenCredits);
             _quitButton.onClick.AddListener(Application.Quit);
             _quitButton.gameObject.SetActive(Application.platform != RuntimePlatform.WebGLPlayer && !Application.isMobilePlatform);
 
@@ -125,6 +131,8 @@ namespace Escoba.App
             }
 
             _settingsPanel.Hide();
+            _howToPlayPanel.Hide();
+            _creditsPanel.Hide();
             CloseSetup();
         }
 
@@ -136,13 +144,29 @@ namespace Escoba.App
         /// <summary>Abre el panel de Ajustes sobre el menú.</summary>
         public void OpenSettings()
         {
-            _title.SetActive(false);
-            _mainPanel.SetActive(false);
-            _settingsPanel.Open(() =>
-            {
-                _title.SetActive(true);
-                _mainPanel.SetActive(true);
-            });
+            SetMenuVisible(false);
+            _settingsPanel.Open(() => SetMenuVisible(true));
+        }
+
+        /// <summary>Abre "Cómo se juega".</summary>
+        public void OpenHowToPlay()
+        {
+            SetMenuVisible(false);
+            _howToPlayPanel.Open(() => SetMenuVisible(true));
+        }
+
+        /// <summary>Abre los créditos.</summary>
+        public void OpenCredits()
+        {
+            SetMenuVisible(false);
+            _creditsPanel.Open(() => SetMenuVisible(true));
+        }
+
+        private void SetMenuVisible(bool visible)
+        {
+            _title.SetActive(visible);
+            _mainPanel.SetActive(visible);
+            _creditsButton.gameObject.SetActive(visible);
         }
 
         /// <summary>Abre "Nueva partida" con la última configuración del modo elegido.</summary>
@@ -155,8 +179,7 @@ namespace Escoba.App
                 _nameInputs[i].SetTextWithoutNotify(_selection.Names[i] ?? string.Empty);
             }
 
-            _title.SetActive(false);
-            _mainPanel.SetActive(false);
+            SetMenuVisible(false);
             _setupPanel.SetActive(true);
             Refresh();
         }
@@ -186,8 +209,7 @@ namespace Escoba.App
         private void CloseSetup()
         {
             _setupPanel.SetActive(false);
-            _mainPanel.SetActive(true);
-            _title.SetActive(true);
+            SetMenuVisible(true);
         }
 
         private void SetPlayerCount(int count)

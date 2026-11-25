@@ -3,6 +3,11 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+### Added — M5: «Cómo se juega» y créditos
+- **Cómo se juega** (menú principal y pausa): 10 páginas (objetivo, valor de las cartas, turno, captura obligatoria, escoba, fin de ronda, puntos, setenta, jugadores y parejas, controles) con ejemplos dibujados con la baraja activa, así que se actualizan solos al cambiar las cartas (`HowToPlayGuide`, `HowToPlayPage`, `HowToPlayPanel`).
+- **Créditos** (en gallego, *Autoría*): botón abajo a la izquierda del menú con la autoría y licencias de cartas, sonidos y música (crédito CC-BY de Kevin MacLeod) (`CreditsPanel`).
+- Tests: `HowToPlayGuideTests` (textos, cartas distintas y ejemplos que suman 15) y `Menu_HowToPlayAndCredits_ShowEveryPageTranslated` (PlayMode). Total: 189 EditMode + 10 PlayMode.
+
 ### Added — M5: ajustes, pausa y sonido
 - Panel **Ajustes** (menú principal y pausa): idioma (galego, español, English), volumen de música y de efectos, velocidad de las animaciones (lenta, normal, rápida) y pantalla completa (escritorio y web). Cada cambio se aplica al momento y se guarda; sin cambios no se escribe ninguna preferencia (`UserSettings`, `SettingsPanel`).
 - **Pausa** en la partida (botón "Menú"): continuar, ajustes o salir al menú avisando de que se pierde la partida. Mientras está abierta se detiene el juego (`PausePanel`).

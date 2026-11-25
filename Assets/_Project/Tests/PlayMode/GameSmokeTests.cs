@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Escoba.AI;
 using Escoba.App;
 using Escoba.Core;
@@ -251,6 +252,51 @@ namespace Escoba.Tests.PlayMode
             yield return WaitFor(() => SceneManager.GetActiveScene().name == SceneNames.MainMenu, 5f);
             yield return null;
             Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(SceneNames.MainMenu));
+        }
+
+        [UnityTest]
+        public IEnumerator Menu_HowToPlayAndCredits_ShowEveryPageTranslated()
+        {
+            SceneManager.LoadScene(SceneNames.MainMenu);
+            yield return null;
+            yield return null;
+
+            var menu = Object.FindFirstObjectByType<MainMenuController>();
+            menu.OpenHowToPlay();
+            yield return null;
+            var howTo = Object.FindFirstObjectByType<HowToPlayPanel>();
+            Assert.That(howTo != null && howTo.IsOpen, Is.True, "Cómo se juega se abre desde el menú");
+
+            for (int page = 0; page < howTo.PageCount; page++)
+            {
+                Assert.That(howTo.PageIndex, Is.EqualTo(page));
+                yield return null;
+                AssertNoMissingTexts();
+                Assert.That(howTo.VisibleCardSprites().All(s => s != null), Is.True, $"página {page + 1}: carta sin sprite");
+                howTo.Next();
+            }
+
+            Assert.That(howTo.PageIndex, Is.EqualTo(howTo.PageCount - 1), "no pasa de la última página");
+            howTo.Close();
+            Assert.That(howTo.IsOpen, Is.False);
+
+            menu.OpenCredits();
+            yield return null;
+            var credits = Object.FindFirstObjectByType<CreditsPanel>();
+            Assert.That(credits != null && credits.IsOpen, Is.True);
+            AssertNoMissingTexts();
+            string text = credits.GetComponentsInChildren<TMP_Text>().Select(t => t.text).Aggregate(string.Empty, (a, b) => a + b);
+            Assert.That(text, Does.Contain("Kevin MacLeod").And.Contain("creativecommons.org/licenses/by/4.0"), "crédito CC-BY de la música");
+            credits.Close();
+        }
+
+        private static void AssertNoMissingTexts()
+        {
+            foreach (TMP_Text text in Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None))
+            {
+                Assert.That(text.text, Does.Not.StartWith("["), $"texto sin traducir en {text.name}: {text.text}");
+                Assert.That(text.text, Does.Not.Contain("{0}"), $"texto sin parámetros en {text.name}: {text.text}");
+            }
         }
 
         /// <summary>Pulsa "Menú" (abre la pausa) y después "Salir al menú".</summary>

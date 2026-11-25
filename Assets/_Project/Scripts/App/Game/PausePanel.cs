@@ -16,6 +16,8 @@ namespace Escoba.App
         [SerializeField] private Button _settingsButton;
         [SerializeField] private Button _quitButton;
         [SerializeField] private SettingsPanel _settings;
+        [SerializeField] private Button _howToPlayButton;
+        [SerializeField] private HowToPlayPanel _howToPlay;
 
         private bool _wired;
 
@@ -29,6 +31,7 @@ namespace Escoba.App
             gameObject.SetActive(true);
             _content.SetActive(true);
             _settings.Hide();
+            _howToPlay.Hide();
             Time.timeScale = 0f;
         }
 
@@ -36,6 +39,7 @@ namespace Escoba.App
         public void Resume()
         {
             _settings.Hide();
+            _howToPlay.Hide();
             gameObject.SetActive(false);
             Time.timeScale = 1f;
         }
@@ -73,6 +77,11 @@ namespace Escoba.App
             {
                 _content.SetActive(false);
                 _settings.Open(() => _content.SetActive(true));
+            });
+            _howToPlayButton.onClick.AddListener(() =>
+            {
+                _content.SetActive(false);
+                _howToPlay.Open(() => _content.SetActive(true));
             });
         }
     }
