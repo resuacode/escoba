@@ -29,6 +29,8 @@ namespace Escoba.Presentation
         [SerializeField] private RectTransform _tableDropZone;
         [SerializeField] private RectTransform _deckAnchor;
         [SerializeField] private HudView _hud;
+        [Tooltip("Capa de partículas (escoba, siete de oros). Opcional.")]
+        [SerializeField] private UiParticles _effects;
 
         [Header("Tamaños (unidades del Canvas de referencia 1920×1080)")]
         [SerializeField] private float _cardHeight = 180f;
@@ -45,6 +47,8 @@ namespace Escoba.Presentation
         [SerializeField] private float _moveDuration = 0.25f;
         [SerializeField] private float _capturePause = 0.35f;
         [SerializeField] private float _bannerDuration = 1.0f;
+        [SerializeField] private float _escobaBannerDuration = 1.4f;
+        [SerializeField] private float _goldSevenDuration = 0.8f;
 
         private readonly Dictionary<int, CardView> _faceViews = new Dictionary<int, CardView>();
         private readonly List<Card> _viewerHand = new List<Card>();
@@ -568,10 +572,41 @@ namespace Escoba.Presentation
             }
 
             yield return Wait(MoveTime + (_capturePause / Mathf.Max(0.01f, Speed)));
+            yield return CelebrateGoldSeven(e);
 
             var cards = new List<Card> { e.PlayedCard };
             cards.AddRange(e.Captured);
             yield return SweepToPile(e.Seat, cards, e.IsEscoba ? 1 : 0, e.IsEscoba ? Localization.Get("game.escoba") : null);
+        }
+
+        /// <summary>Si la captura incluye el siete de oros: la carta late, destellos y aviso corto.</summary>
+        private IEnumerator CelebrateGoldSeven(CardsCapturedEvent e)
+        {
+            int goldSeven = e.PlayedCard.IsGoldSeven ? e.PlayedCard.Id : -1;
+            foreach (Card card in e.Captured)
+            {
+                if (card.IsGoldSeven)
+                {
+                    goldSeven = card.Id;
+                }
+            }
+
+            if (goldSeven < 0)
+            {
+                yield break;
+            }
+
+            float duration = _goldSevenDuration / Mathf.Max(0.01f, Speed);
+            CardView view = _faceViews[goldSeven];
+            view.transform.SetAsLastSibling();
+            view.Punch(1.3f, duration * 0.6f);
+            Sounds.Play(SoundCue.GoldSeven);
+            if (_effects != null)
+            {
+                _effects.BurstAt(view.Rect, ParticleStyle.Sparkle, 30);
+            }
+
+            yield return _hud.ShowBanner(Localization.Get("game.gold_seven"), duration);
         }
 
         private IEnumerator SweepToPile(int seat, List<Card> cards, int escobas, string banner)
@@ -601,11 +636,17 @@ namespace Escoba.Presentation
             if (escobas > 0)
             {
                 Sounds.Play(SoundCue.Escoba);
+                if (_effects != null)
+                {
+                    _effects.BurstAt(_tableAnchor, ParticleStyle.Sparkle, 40);
+                    _effects.BurstAt(_tableAnchor, ParticleStyle.Confetti, 50);
+                }
             }
 
             if (!string.IsNullOrEmpty(banner))
             {
-                yield return _hud.ShowBanner(banner, _bannerDuration / Mathf.Max(0.01f, Speed));
+                float duration = (escobas > 0 ? _escobaBannerDuration : _bannerDuration) / Mathf.Max(0.01f, Speed);
+                yield return _hud.ShowBanner(banner, duration, escobas > 0);
             }
         }
 

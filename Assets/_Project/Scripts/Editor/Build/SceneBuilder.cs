@@ -346,6 +346,13 @@ namespace Escoba.Editor.Build
             PausePanel pause = BuildPausePanel(safe);
             SetField(menuButton, "_pause", pause);
 
+            // Capa de partículas (escoba, siete de oros, confeti final); se pone delante al usarse.
+            RectTransform effectsLayer = CreateRect("Effects", safe);
+            Stretch(effectsLayer);
+            var effects = effectsLayer.gameObject.AddComponent<UiParticles>();
+            SetField(effects, "_sparkleSprite", KnobSprite);
+            SetField(gameOver, "_effects", effects);
+
             // Mesa y controlador
             var table = new GameObject("Table").AddComponent<TablePresenter>();
             SetField(table, "_cardPrefab", cardPrefab);
@@ -356,6 +363,7 @@ namespace Escoba.Editor.Build
             SetField(table, "_tableDropZone", tableArea.rectTransform);
             SetField(table, "_deckAnchor", deckAnchor);
             SetField(table, "_hud", hud);
+            SetField(table, "_effects", effects);
 
             var controller = new GameObject("GameController").AddComponent<GameController>();
             SetField(controller, "_table", table);
@@ -439,7 +447,10 @@ namespace Escoba.Editor.Build
             Place((RectTransform)next.transform, new Vector2(0.5f, 0f), new Vector2(0f, 75f), new Vector2(420f, 90f));
             next.image.color = Gold;
 
+            CanvasGroup summaryGroup = overlay.gameObject.AddComponent<CanvasGroup>();
             var summary = overlay.gameObject.AddComponent<RoundSummaryPanel>();
+            SetField(summary, "_panel", panel.rectTransform);
+            SetField(summary, "_group", summaryGroup);
             SetField(summary, "_title", title);
             SetField(summary, "_labels", labels);
             SetField(summary, "_headers", headers);

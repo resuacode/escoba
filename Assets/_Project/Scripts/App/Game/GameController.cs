@@ -251,6 +251,7 @@ namespace Escoba.App
             GameState state = _engine.State;
             bool next = false;
             int[] columnSides = SideOrder();
+            _roundSummary.Speed = _table.Speed;
             _roundSummary.Show(state.RoundNumber, state.LastRoundScore, Scores(), columnSides,
                 columnSides.Select(s => _sideNames[s]).ToArray(), state.Rules, () => next = true);
             yield return new WaitUntil(() => next);
@@ -268,12 +269,16 @@ namespace Escoba.App
             string title = localWon
                 ? Localization.Get(_config.Teams ? "gameover.team_you_win" : "gameover.you_win")
                 : Localization.Get("gameover.winner", winner);
+            // Confeti si gana un humano (contra la IA, solo si ganas tú o tu pareja).
+            bool humanWon = !_autoPlayAllSeats && Enumerable.Range(0, _config.PlayerCount)
+                .Any(seat => _config.Seats[seat] == SeatType.Human && state.SideOfSeat(seat) == state.WinnerSide);
             _gameOver.Show(
                 title,
                 order.Select(s => _sideNames[s]).ToArray(),
                 order.Select(s => scores[s]).ToArray(),
                 Rematch,
-                GoToMenu);
+                GoToMenu,
+                humanWon);
         }
 
         /// <summary>Bandos en orden de columna: con un solo humano, el suyo primero.</summary>

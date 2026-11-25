@@ -122,6 +122,29 @@ namespace Escoba.Presentation
             _move = StartCoroutine(MoveRoutine(position, duration, delay));
         }
 
+        /// <summary>Late una vez (crece y vuelve a su tamaño), p. ej. al capturar el siete de oros.</summary>
+        public void Punch(float scale, float duration)
+        {
+            if (isActiveAndEnabled && duration > 0f)
+            {
+                StartCoroutine(PunchRoutine(scale, duration));
+            }
+        }
+
+        private IEnumerator PunchRoutine(float scale, float duration)
+        {
+            float time = 0f;
+            while (time < duration)
+            {
+                time += Time.deltaTime;
+                float t = Mathf.Clamp01(time / duration);
+                transform.localScale = Vector3.one * (1f + ((scale - 1f) * Mathf.Sin(t * Mathf.PI)));
+                yield return null;
+            }
+
+            transform.localScale = Vector3.one;
+        }
+
         public void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.dragging)

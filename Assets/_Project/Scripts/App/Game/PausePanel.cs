@@ -29,6 +29,7 @@ namespace Escoba.App
         {
             Wire();
             gameObject.SetActive(true);
+            transform.SetAsLastSibling();
             _content.SetActive(true);
             _settings.Hide();
             _howToPlay.Hide();

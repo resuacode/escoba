@@ -74,7 +74,7 @@ Estado: **M0–M4 completados, versión 0.4.0; siguiente M5** · Última actuali
 - [x] Pausa en partida con aviso al salir (2026-11-25)
 - [x] Efectos de sonido (Kenney *Casino Audio*, CC0) (2026-11-25)
 - [x] Música de fondo: tema de menú + 4 pistas de partida al azar con fundido cruzado (2026-11-25)
-- [ ] Animación destacada de "¡Escoba!", partículas y resumen de ronda animado
+- [x] Animación destacada de "¡Escoba!" y del siete de oros, partículas, resumen de ronda y fin de partida animados (2026-11-25)
 - [ ] Accesibilidad: tamaño de texto, modo daltónico, botones táctiles grandes
 - [ ] Créditos (necesarios si la música es CC-BY)
 - [x] "Cómo se juega" (10 páginas con ejemplos) y Créditos/Autoría (2026-11-25)

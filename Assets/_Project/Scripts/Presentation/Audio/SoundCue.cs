@@ -29,5 +29,11 @@ namespace Escoba.Presentation
 
         /// <summary>Fin de partida.</summary>
         GameOver = 8,
+
+        /// <summary>Llevarse el siete de oros.</summary>
+        GoldSeven = 9,
+
+        /// <summary>Aparece una fila con puntos en el resumen de ronda.</summary>
+        ScoreTick = 10,
     }
 }

@@ -223,7 +223,10 @@ Lectura: los objetivos se cumplen con margen. El nivel Fácil resulta muy débil
 | Reparto | Cartas vuelan del mazo a manos y mesa en secuencia | 0,08 s/carta |
 | Jugar carta | Vuelo mano → mesa con leve rotación | 0,25 s |
 | Captura | Cartas capturadas se resaltan y vuelan a la baza | 0,35 s |
-| Escoba | Texto "¡ESCOBA!" + partículas UI + sonido | 1,0 s |
+| Escoba | Aviso "¡Escoba!" con rebote y latido + destellos y confeti sobre la mesa + sonido (implementado) | 1,4 s |
+| Siete de oros | La carta late, destellos dorados, sonido y aviso corto "¡Siete de oros!" (implementado) | 0,8 s |
+| Resumen de ronda | Entrada con fundido y rebote; filas una a una con sonido si dan puntos; tocar "Siguiente" completa la animación (implementado) | 0,22 s/fila |
+| Fin de partida | Título con rebote; si gana un humano, destellos y 3 oleadas de confeti (implementado) | ~2 s |
 | Turno | Brillo en el avatar/nombre del jugador activo | continuo |
 | Puntuación | Contador animado en el marcador | 0,5 s |
 - Toda animación es saltable con un toque y escala con la velocidad elegida. La lógica no espera a las animaciones (cola de eventos).

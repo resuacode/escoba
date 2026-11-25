@@ -39,6 +39,8 @@ namespace Escoba.Editor.Build
             (SoundCue.RevealHand, "card-fan-", 0.7f),
             (SoundCue.RoundEnd, "chips-handle-", 0.8f),
             (SoundCue.GameOver, "chips-collide-", 1f),
+            (SoundCue.GoldSeven, "chips-collide-", 0.75f),
+            (SoundCue.ScoreTick, "chip-lay-", 0.6f),
         };
 
         [MenuItem("Escoba/Build/Create Default Assets")]

@@ -91,6 +91,7 @@
     { "key": "game.select_card", "value": "Escolle unha carta da túa man" },
     { "key": "game.drop_hint", "value": "Esta carta non leva nada: quedará na mesa" },
     { "key": "game.escoba", "value": "Escoba!" },
+    { "key": "game.gold_seven", "value": "Sete de ouros!" },
     { "key": "game.escobas", "value": "Escobas: {0}" },
     { "key": "game.cards.one", "value": "{0} carta" },
     { "key": "game.cards.other", "value": "{0} cartas" },

@@ -3,6 +3,15 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+### Added — M5: animaciones y partículas
+- **Partículas de interfaz** (`UiParticles`, `ParticleStyle`): destellos dorados y confeti con gravedad y giro, hechos con imágenes de uGUI (los `ParticleSystem` no se ven en un Canvas de pantalla). Usan tiempo de juego, así que se congelan en pausa.
+- **Escoba**: destellos y confeti sobre la mesa, sonido y aviso con entrada con rebote y latido (1,4 s).
+- **Siete de oros**: al llevárselo, la carta late, suelta destellos, suena y aparece un aviso corto «¡Siete de oros!».
+- **Resumen de ronda animado**: entra con fundido y rebote, y las filas aparecen de una en una con sonido cuando dan puntos. «Siguiente ronda» durante la animación la completa al instante. Sigue la velocidad de animación elegida.
+- **Fin de partida**: el título entra con rebote y, si gana un humano, destellos y tres oleadas de confeti desde las esquinas.
+- Efectos de sonido nuevos `GoldSeven` y `ScoreTick`; `CardView.Punch`; `HudView.ShowBanner` con rebote (`EaseOutBack`).
+- Test `Effects_ParticlesExpireAndRoundSummaryRevealsAllRows` (PlayMode). Total: 189 EditMode + 11 PlayMode.
+
 ### Added — M5: «Cómo se juega» y créditos
 - **Cómo se juega** (menú principal y pausa): 10 páginas (objetivo, valor de las cartas, turno, captura obligatoria, escoba, fin de ronda, puntos, setenta, jugadores y parejas, controles) con ejemplos dibujados con la baraja activa, así que se actualizan solos al cambiar las cartas (`HowToPlayGuide`, `HowToPlayPage`, `HowToPlayPanel`).
 - **Créditos** (en gallego, *Autoría*): botón abajo a la izquierda del menú con la autoría y licencias de cartas, sonidos y música (crédito CC-BY de Kevin MacLeod) (`CreditsPanel`).

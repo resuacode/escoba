@@ -290,6 +290,47 @@ namespace Escoba.Tests.PlayMode
             credits.Close();
         }
 
+        [UnityTest]
+        public IEnumerator Effects_ParticlesExpireAndRoundSummaryRevealsAllRows()
+        {
+            yield return EnsureAppContext();
+            GameController controller = null;
+            yield return LoadGame(MatchConfig.Versus(DefaultPreset(), BotDifficulty.Easy), false, 40f, c => controller = c);
+
+            // Partículas: aparecen y se apagan solas.
+            var effects = Object.FindFirstObjectByType<UiParticles>();
+            Assert.That(effects, Is.Not.Null, "la mesa tiene capa de partículas");
+            effects.Burst(Vector2.zero, ParticleStyle.Sparkle, 20);
+            effects.Burst(Vector2.zero, ParticleStyle.Confetti, 20);
+            Assert.That(effects.ActiveCount, Is.GreaterThanOrEqualTo(40));
+            yield return WaitFor(() => effects.ActiveCount == 0, 5f);
+            Assert.That(effects.ActiveCount, Is.Zero, "las partículas desaparecen");
+
+            // Jugar (siempre la primera jugada legal) hasta el resumen de la primera ronda.
+            var table = Object.FindFirstObjectByType<TablePresenter>();
+            var summary = Object.FindFirstObjectByType<RoundSummaryPanel>(FindObjectsInactive.Include);
+            float deadline = Time.realtimeSinceStartup + 90f;
+            while (!summary.gameObject.activeSelf && Time.realtimeSinceStartup < deadline)
+            {
+                yield return WaitFor(() => table.IsWaitingForHuman || summary.gameObject.activeSelf, 20f);
+                if (table.IsWaitingForHuman)
+                {
+                    table.SubmitAutomatically(LegalMoves.For(controller.ViewFor(0))[0]);
+                    yield return null;
+                }
+            }
+
+            Assert.That(summary.gameObject.activeSelf, Is.True, "debe aparecer el resumen de ronda");
+            yield return WaitFor(() => !summary.IsRevealing, 10f);
+            Assert.That(summary.IsRevealing, Is.False, "la animación del resumen termina");
+            foreach (TMP_Text text in summary.GetComponentsInChildren<TMP_Text>())
+            {
+                Assert.That(text.maxVisibleLines, Is.GreaterThanOrEqualTo(text.textInfo.lineCount), $"{text.name}: todas las filas visibles");
+            }
+
+            summary.Continue();
+        }
+
         private static void AssertNoMissingTexts()
         {
             foreach (TMP_Text text in Object.FindObjectsByType<TMP_Text>(FindObjectsSortMode.None))

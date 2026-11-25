@@ -141,8 +141,11 @@ namespace Escoba.Presentation
             }
         }
 
-        /// <summary>Muestra un aviso grande durante un tiempo (con fundido).</summary>
-        public IEnumerator ShowBanner(string text, float duration)
+        /// <summary>
+        /// Muestra un aviso grande durante un tiempo, con fundido y entrada con rebote. Con
+        /// <paramref name="emphasis"/> (escoba) el rebote es mayor y el texto late mientras se ve.
+        /// </summary>
+        public IEnumerator ShowBanner(string text, float duration, bool emphasis = false)
         {
             if (_bannerGroup == null || _banner == null || duration <= 0f)
             {
@@ -151,18 +154,35 @@ namespace Escoba.Presentation
 
             _banner.text = text;
             _bannerGroup.gameObject.SetActive(true);
+            Transform target = _bannerGroup.transform;
             const float fade = 0.15f;
+            float popTime = Mathf.Min(0.35f, duration * 0.4f);
+            float from = emphasis ? 0.35f : 0.8f;
             float time = 0f;
             while (time < duration)
             {
                 time += Time.deltaTime;
                 float alpha = Mathf.Min(1f, Mathf.Min(time / fade, (duration - time) / fade));
                 _bannerGroup.alpha = Mathf.Clamp01(alpha);
+                float scale = time < popTime
+                    ? Mathf.LerpUnclamped(from, 1f, EaseOutBack(time / popTime))
+                    : 1f + (emphasis ? 0.03f * Mathf.Sin((time - popTime) * 9f) : 0f);
+                target.localScale = Vector3.one * scale;
                 yield return null;
             }
 
+            target.localScale = Vector3.one;
             _bannerGroup.alpha = 0f;
             _bannerGroup.gameObject.SetActive(false);
+        }
+
+        /// <summary>Curva con rebote al final (sobrepasa 1 y vuelve).</summary>
+        public static float EaseOutBack(float t)
+        {
+            const float c1 = 1.9f;
+            const float c3 = c1 + 1f;
+            t = Mathf.Clamp01(t) - 1f;
+            return 1f + (c3 * t * t * t) + (c1 * t * t);
         }
 
         private void Awake()
