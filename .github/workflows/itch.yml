@@ -1,0 +1,47 @@
+# Subida manual a itch.io de una release ya publicada en GitHub (sin recompilar).
+# Útil si falló el paso de itch.io de "Release" o para resubir una versión.
+# Requiere la variable ITCH_TARGET y el secret BUTLER_API_KEY (ver docs/CI.md).
+name: itch.io (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Etiqueta de la release (p. ej. v0.4.0)'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  itch:
+    name: Subir ${{ inputs.tag }} a itch.io
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar ficheros de la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir dist
+          mkdir -p android
+          mv dist/*-Android.apk android/
+          ls -la dist android
+
+      - name: Instalar butler
+        run: |
+          curl -sSfL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          ./butler/butler -V
+
+      - name: Publicar canales (html5, windows, android)
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          TARGET: ${{ vars.ITCH_TARGET }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          version="${TAG#v}"
+          ./butler/butler push dist/*-WebGL.zip "${TARGET}:html5" --userversion "$version"
+          ./butler/butler push dist/*-Windows.zip "${TARGET}:windows" --userversion "$version"
+          ./butler/butler push android "${TARGET}:android" --userversion "$version"

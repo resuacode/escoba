@@ -97,5 +97,6 @@ Versiones con sufijo (`v0.5.0-beta.1`) se publican como *prerelease*. El `versio
 | CI falla en la activación | Revisa los tres secrets de Unity; vuelve a generar el `.ulf` |
 | La web carga en blanco en Pages | Comprueba que *Decompression Fallback* sigue activado |
 | *Release* no puede desplegar Pages | Añade la regla de etiquetas `v*` al entorno `github-pages` |
-| Paso de itch.io falla | Falta `BUTLER_API_KEY` o `ITCH_TARGET` no es `usuario/juego` |
+| Paso de itch.io falla | Falta `BUTLER_API_KEY` o `ITCH_TARGET` no es `usuario/juego`. Tras corregirlo, resube sin recompilar con *Actions → itch.io (manual) → Run workflow* indicando la etiqueta (`itch.yml`); *Re-run* del job usaría el workflow antiguo de la etiqueta |
+| `Could not resolve host` al instalar butler | El servidor de descargas de itch.io es `broth.itch.zone` (el antiguo `broth.itch.ovh` ya no existe) |
 | El APK no se puede actualizar | Se instaló uno firmado con otra clave: desinstala y reinstala |

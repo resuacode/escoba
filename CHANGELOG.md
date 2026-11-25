@@ -3,6 +3,11 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+### Added
+- Workflow manual `itch.yml` (*itch.io (manual)*): sube a itch.io los ficheros de una release ya publicada, sin recompilar.
+
+### Fixed
+- `release.yml`: butler se descarga de `broth.itch.zone` (el dominio `broth.itch.ovh` ya no resuelve y hacía fallar el paso de itch.io de la `v0.4.0`).
 
 ## [0.4.0] - 2026-11-24
 Primera versión publicada: Escoba jugable contra la IA (Fácil, Media y Difícil) o en un mismo dispositivo, de 2 a 4 jugadores y por parejas, en español, gallego e inglés.
