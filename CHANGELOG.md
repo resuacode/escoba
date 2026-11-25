@@ -3,6 +3,31 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/); versionado [SemVer](https://semver.org/lang/es/).
 
 ## [Unreleased]
+
+## [0.5.0] - 2026-11-25
+Pulido (M5): ajustes, pausa, efectos de sonido y música, «Cómo se juega», créditos, animaciones y partículas, accesibilidad y mejor encaje en pantallas panorámicas. Gallego como idioma por defecto.
+
+### Added — M5: pantallas panorámicas, sonido al pasar el ratón y guía de arte
+- **Sonido sutil al pasar el ratón** por las cartas de la mano (solo ratón, no en táctil; `SoundCue.CardHover`).
+- **Fondo de mesa opcional**: si existe `Art/Table/table_background.png`, el menú y la mesa lo usan a pantalla completa recortando lo que sobre (`GameSettings.TableBackground`, `TableArtPostprocessor`).
+- `docs/ART_GUIDE.md`: tamaños y formatos de cartas, dorso, fondo de mesa, icono (y adaptativo de Android), pantalla de arranque e imágenes de itch.io.
+- Tests `SafeCanvasScalerTests` (6 proporciones de pantalla). Total: 198 EditMode + 12 PlayMode.
+
+### Fixed
+- En pantallas más panorámicas que 16:9 (móviles 20:9, navegador con barras) los botones de arriba y abajo quedaban pegados al borde o cortados: el Canvas dejaba menos de 1080 de alto de diseño. Ahora `SafeCanvasScaler` escala para que el diseño de 1920×1080 más un margen de 24 quepa siempre entero en la zona segura, y `SafeArea` deja ese margen interior.
+
+### Added — M5: accesibilidad y medidor de rendimiento
+- **Alto contraste (daltonismo)** en Ajustes: cartas que se pueden llevar con borde blanco, carta seleccionada en naranja intenso, bordes más gruesos y cartas no elegibles más oscuras; el resaltado ya no depende solo del tono (`AccessibilityOptions`, `CardView`).
+- **Interfaz grande** en Ajustes (activada por defecto en móvil): textos hasta un 20 % más grandes sin salirse de su caja (`ScalableText`) y botones Jugar, Deshacer y Menú un 25 % más grandes (`ScalableButton`).
+- **Medidor de rendimiento oculto**: tocar 5 veces la versión del menú muestra FPS (medios y mínimos) y el tiempo de decisión de la IA (último y máximo) (`PerfOverlay`, `PerfStats`). Para medir en móvil y web.
+- Tests: `Accessibility_DefaultsDependOnPlatformAndPersist` (EditMode) y `Accessibility_HighContrastAndLargeUi_ApplyInGame` (PlayMode). Total: 190 EditMode + 12 PlayMode.
+
+### Changed
+- Los interruptores de Ajustes (pantalla completa, alto contraste, interfaz grande) muestran «Sí/No» (gl: «Si/Non»).
+
+### Fixed
+- `UiFactory.SetField` no guardaba valores `Vector2`/`float` (quedaban a cero en las escenas generadas).
+
 ### Added — M5: animaciones y partículas
 - **Partículas de interfaz** (`UiParticles`, `ParticleStyle`): destellos dorados y confeti con gravedad y giro, hechos con imágenes de uGUI (los `ParticleSystem` no se ven en un Canvas de pantalla). Usan tiempo de juego, así que se congelan en pausa.
 - **Escoba**: destellos y confeti sobre la mesa, sonido y aviso con entrada con rebote y latido (1,4 s).

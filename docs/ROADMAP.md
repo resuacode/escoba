@@ -75,7 +75,13 @@ Estado: **M0–M4 completados, versión 0.4.0; siguiente M5** · Última actuali
 - [x] Efectos de sonido (Kenney *Casino Audio*, CC0) (2026-11-25)
 - [x] Música de fondo: tema de menú + 4 pistas de partida al azar con fundido cruzado (2026-11-25)
 - [x] Animación destacada de "¡Escoba!" y del siete de oros, partículas, resumen de ronda y fin de partida animados (2026-11-25)
-- [ ] Accesibilidad: tamaño de texto, modo daltónico, botones táctiles grandes
+- [x] Accesibilidad: alto contraste (daltonismo), interfaz grande (textos y botones de jugada; por defecto en móvil) (2026-11-25)
+- [x] Medidor de rendimiento oculto (5 toques en la versión) (2026-11-25)
+- [x] Probado en Android (v0.4.0): funciona y la IA Difícil no tarda (2026-11-25)
+- [x] Encaje en pantallas panorámicas y navegador móvil: diseño completo con margen dentro de la zona segura (`SafeCanvasScaler`) (2026-11-25)
+- [x] Guía de tamaños de arte (`docs/ART_GUIDE.md`) y soporte de fondo de mesa (2026-11-25)
+- [x] Versión **0.5.0** (2026-11-25)
+- [ ] Arte propio (cartas, icono, arranque, fondo de mesa): lo prepara el autor siguiendo `docs/ART_GUIDE.md`
 - [ ] Créditos (necesarios si la música es CC-BY)
 - [x] "Cómo se juega" (10 páginas con ejemplos) y Créditos/Autoría (2026-11-25)
 - [ ] Tutorial guiado interactivo (se valorará tras probar "Cómo se juega")
